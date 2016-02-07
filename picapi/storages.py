@@ -1,4 +1,4 @@
-import config
+from . import config
 
 import os
 from os import listdir

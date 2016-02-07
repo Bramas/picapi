@@ -1,5 +1,5 @@
-from plugins import add_hook
-from app import app, success
+from picapi.plugins import add_hook
+from picapi.app import app, success
 
 import bottle
 

@@ -3,11 +3,12 @@ import time
 
 from bottle import request
 
-from plugins import add_hook
-from app import app, success
+from picapi.plugins import add_hook
+from picapi.app import app, success
 
 
-import models, database
+from picapi import photos, database
+
 
 class Album():
 
@@ -30,7 +31,7 @@ class Album():
 			INNER JOIN photos             ON r.photo_id = photos.id
 			WHERE albums.id=:id""", {'id':id}).fetchall()
 		db.close()
-		return success([models.Photo().preparePhoto(dict(a)) for a in cur])
+		return success([photos.preparePhoto(dict(a)) for a in cur])
 
 	def photosAlbums(self, id):
 		db = database.connect()
@@ -64,7 +65,6 @@ class Album():
 		db.commit()
 		db.close()
 		return success()
-
 
 
 @app.route('/albums')

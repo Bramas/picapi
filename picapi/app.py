@@ -3,7 +3,7 @@ import bottle.ext.sqlite
 import os, json
 from os.path import isfile, isdir, join
 
-import config
+from . import config
 
 app = None
 

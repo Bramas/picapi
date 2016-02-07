@@ -6,8 +6,8 @@ from os.path import isfile, isdir, join
 import bottle
 from bottle import request, response
 
-import log, config
-from app import app, success, error
+from . import log, config
+from .app import app, success, error
 
 hooks = {}
 

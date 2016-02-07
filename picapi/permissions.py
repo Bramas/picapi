@@ -2,9 +2,9 @@ import bottle
 import os, json, time
 from os.path import isfile, isdir, join
 
-import config, database
-from plugins import add_hook
-from app import app, success, error
+from . import config, database
+from .plugins import add_hook
+from .app import app, success, error
 
 import hmac, base64
 

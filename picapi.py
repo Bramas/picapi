@@ -1,2 +1,3 @@
-from picapi import picapi
+import picapi
 
+picapi.run()
