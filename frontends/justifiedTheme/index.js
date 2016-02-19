@@ -15,6 +15,11 @@ api.post('Album::getAll', {}, function(data) {
 
 import { Router, Route, IndexRoute, Link } from 'react-router'
 
+let photos = []
+let timeline = {}
+
+api.init(function(){
+
 ReactDom.render((
 	<Router>
 		<Route path="/" component={Layout}>
@@ -26,10 +31,8 @@ ReactDom.render((
 	</Router>
 ), document.getElementById('main-container'))
 
-let photos = []
-let timeline = {}
 
-
+});
 /*
 function handleTreeClick(node, toggled){
 	var params = {

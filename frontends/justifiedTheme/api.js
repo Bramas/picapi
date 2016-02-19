@@ -5,10 +5,13 @@
 
 let api = {
 
+	token   : false,
 	path    : 'http://localhost:8080',
 	onError : function(e){ console.log(e); }
 
 }
+
+
 api.thumbUrl = function(photo) {
 	return photo['url_info']['base'] + photo['url_info']['extension'];
 }
@@ -50,6 +53,11 @@ api.post = function(cmd, params, callback) {
 
 	request.send();
 
+}
+
+api.init = function(callback){
+
+	api.post('/authenticate?code=sdfsdf&client_id=qsdfsdf&grant_type=password',{}, callback);
 }
 
 module.exports = api;
