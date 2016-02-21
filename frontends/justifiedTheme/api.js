@@ -21,26 +21,19 @@ api.thumbUrl = function(photo) {
 		return photo['url_info']['base'] + photo['url_info']['extension'];
 	return 'http://placehold.it/300x200';
 }
-api.post = function(cmd, params, callback) {
-
+api.call = function(cmd, method, params, callback) {
 
 	const success = (data) => {
-
-		// Output response when debug mode is enabled
-		//if (lychee.debugMode) console.log(data)
-
-		callback(data)
-
+		if(callback)
+			callback(data)
 	}
 
 	const error = (jqXHR, textStatus, errorThrown) => {
-
 		console.log('Server error or API not found.', params, errorThrown)
-
 	}
 
 	var request = new XMLHttpRequest();
-	request.open('GET', api.path+cmd, true);
+	request.open(method, api.path+cmd, true);
 
 	request.onload = function() {
 	  if (request.status >= 200 && request.status < 400) {
@@ -56,14 +49,81 @@ api.post = function(cmd, params, callback) {
 	request.onerror = function() {
 	  // There was a connection error of some sort
 	};
+	if("string" != typeof params)
+	{
+		/*
+		var prefix, paramsArray = [],
+	        addParam = function (key, value) {
+	        // If value is a function, invoke it and return its value
+	        value = typeof value === "function" ? value() : (value == null ? "" : value);
+	        paramsArray[paramsArray.length] = encodeURIComponent(key) + "=" + encodeURIComponent(value);
+	    };
+		for(o in params) {
+            addParam(o, params[o]);
+        }*/
+		params = this.objectToQueryString(params);
+	}
+	console.log(params)
+	request.send(params);
 
-	request.send();
+}
 
+api.get = function(cmd, params, callback) {
+	return this.call(cmd, 'GET', params, callback);
+}
+api.post = function(cmd, params, callback) {
+	return this.call(cmd, 'POST', params, callback);
+}
+api.delete = function(cmd, params, callback) {
+	return this.call(cmd, 'DELETE', params, callback);
 }
 
 api.init = function(callback){
 
-	api.post('/authenticate?code=sdfsdf&client_id=qsdfsdf&grant_type=password',{}, callback);
+	api.get('/authenticate?code=sdfsdf&client_id=qsdfsdf&grant_type=password',{}, callback);
 }
 
+
+function buildParams(prefix, obj, add) {
+    var name, i, l, rbracket;
+    rbracket = /\[\]$/;
+    if (obj instanceof Array) {
+        for (i = 0, l = obj.length; i < l; i++) {
+            if (rbracket.test(prefix)) {
+                add(prefix, obj[i]);
+            } else {
+                buildParams(prefix + "[" + ( typeof obj[i] === "object" ? i : "" ) + "]", obj[i], add);
+            }
+        }
+    } else if (typeof obj == "object") {
+        // Serialize object item.
+        for (name in obj) {
+            buildParams(prefix + "[" + name + "]", obj[ name ], add);
+        }
+    } else {
+        // Serialize scalar item.
+        add(prefix, obj);
+    }
+}
+api.objectToQueryString = function (a) {
+    var prefix, s, add, name, r20, output;
+    s = [];
+    r20 = /%20/g;
+    add = function (key, value) {
+        // If value is a function, invoke it and return its value
+        value = ( typeof value == 'function' ) ? value() : ( value == null ? "" : value );
+        s[ s.length ] = encodeURIComponent(key) + "=" + encodeURIComponent(value);
+    };
+    if (a instanceof Array) {
+        for (name in a) {
+            add(name, a[name]);
+        }
+    } else {
+        for (prefix in a) {
+            buildParams(prefix, a[ prefix ], add);
+        }
+    }
+    output = s.join("&").replace(r20, "+");
+    return output;
+};
 module.exports = api;

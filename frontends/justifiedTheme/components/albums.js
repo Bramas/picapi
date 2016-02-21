@@ -53,7 +53,7 @@ module.exports = React.createClass({
   	this.setState({albums: data})
   },
   fetchInvoice () {
-    api.post('/albums', {}, this.onDataReceived);
+    api.get('/albums', {}, this.onDataReceived);
   },
   render () {
     return <AlbumsView albums={this.state.albums}/>

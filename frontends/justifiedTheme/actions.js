@@ -1,8 +1,11 @@
 
-import api from './api';
+
 
 export const ALBUM_MOVE_PHOTO = 'ALBUM_MOVE_PHOTO';
 export function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
+  var api = require('./api');
+	api.delete('/albums/'+originAlbumId+'/photos/'+photoId, {});
+	api.post('/albums/'+destinationAlbumId+'/photos', {photo_id: photoId});
   return {
     type: ALBUM_MOVE_PHOTO,
     originAlbumId,
@@ -34,7 +37,7 @@ export function fetchAlbumPhotos(albumId) {
 	var api = require('./api');
 	return dispatch => {
 		dispatch(requestAlbumPhotos(albumId))
-		api.post('/albums/'+albumId+'/photos', {}, function(data){
+		api.get('/albums/'+albumId+'/photos', {}, function(data){
 			dispatch(receiveAlbumPhotos(albumId, data))
 		});
 	}

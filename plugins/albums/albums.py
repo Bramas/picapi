@@ -1,10 +1,10 @@
 import time
 
 
-from bottle import request
+from bottle import request, response
 
 from picapi.plugins import add_hook
-from picapi.app import app, success
+from picapi.app import app, success, error
 
 
 from picapi import photos, database
@@ -80,6 +80,17 @@ class Album():
 		db.close()
 		return success({'id': cur.lastrowid})
 
+	def delete_photo(self, album_id, photo_id):
+		db = database.connect()
+		cur = db.execute("DELETE FROM albums_photos WHERE album_id = :album_id AND photo_id = :photo_id", 
+			{
+				'album_id': album_id,
+				'photo_id': photo_id
+			})
+		db.commit()
+		db.close()
+		return success()
+
 	def add_photo(self, album_id, photo_id):
 		db = database.connect()
 		cur = db.execute("INSERT INTO albums_photos (album_id, photo_id) VALUES (:album_id, :photo_id)", 
@@ -124,6 +135,19 @@ def albumsPost():
 
 @app.route('/albums/<id:int>/photos', method='POST')
 def albumsPhotosPost(id):
-
+	if not 'photo_id' in request.params:
+		return error(msg='the param \'photo_id\' is missing')
 	return Album().add_photo(id, request.params['photo_id'])
+
+@app.route('/albums/<id:int>/photos/<photo_id:int>', method='DELETE')
+def albumsPhotosDelete(id, photo_id):
+	return Album().delete_photo(id, photo_id)
+
+@app.route('/albums/<id:re:unsorted>/photos/<pid:int>', method='DELETE')
+@app.route('/albums/<id:re:unsorted>/photos', method='POST')
+@app.route('/albums/<id>/photos/<pid:int>', method='OPTIONS')
+@app.route('/albums/<id>/photos', method='OPTIONS')
+def albumsPhotosOptions(id, pid=None):
+	response.set_header('Access-Control-Allow-Methods', 'GET, POST, DELETE')
+	return success()
 

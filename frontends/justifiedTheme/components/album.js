@@ -103,7 +103,7 @@ let Album = React.createClass({
 		albumID: this.props.params.albumId,
 		password: null
 		}
-		api.post('/albums/'+this.props.params.albumId+'/photos', {}, this.onDataReceived);
+		api.get('/albums/'+this.props.params.albumId+'/photos', {}, this.onDataReceived);
 
 	},
 
