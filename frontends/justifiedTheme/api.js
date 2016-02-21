@@ -2,18 +2,24 @@
  * @description This module communicates with Lychee's API
  * @copyright   2015 by Tobias Reich
  */
+import { createStore, applyMiddleware  } from 'redux'
+import thunkMiddleware from 'redux-thunk'
+import reducerApp from './reducers'
 
 let api = {
 
 	token   : false,
 	path    : 'http://localhost:8080',
-	onError : function(e){ console.log(e); }
+	onError : function(e){ console.log(e); },
+	store   : createStore(reducerApp, undefined, applyMiddleware(thunkMiddleware))
 
 }
 
 
 api.thumbUrl = function(photo) {
-	return photo['url_info']['base'] + photo['url_info']['extension'];
+	if(photo && photo['url_info'])
+		return photo['url_info']['base'] + photo['url_info']['extension'];
+	return 'http://placehold.it/300x200';
 }
 api.post = function(cmd, params, callback) {
 

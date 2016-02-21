@@ -12,8 +12,8 @@ api.post('Album::getAll', {}, function(data) {
 	ReactDom.render(<Albums albums={data.albums} />, document.getElementById('main-container'))
 });*/
 
-
 import { Router, Route, IndexRoute, Link } from 'react-router'
+import { Provider } from 'react-redux'
 
 let photos = []
 let timeline = {}
@@ -21,14 +21,16 @@ let timeline = {}
 api.init(function(){
 
 ReactDom.render((
-	<Router>
-		<Route path="/" component={Layout}>
-			<IndexRoute component={Albums}/>
-			<Route path="/timeline" component={Timeline}/>
-			<Route path="/albums" component={Albums}/>
-			<Route path="/album/:albumId" component={Album}/>
-		</Route>
-	</Router>
+	<Provider store={api.store}>
+		<Router>
+			<Route path="/" component={Layout}>
+				<IndexRoute component={Albums}/>
+				<Route path="/timeline" component={Timeline}/>
+				<Route path="/albums" component={Albums}/>
+				<Route path="/album/:albumId" component={Album}/>
+			</Route>
+		</Router>
+	</Provider>
 ), document.getElementById('main-container'))
 
 

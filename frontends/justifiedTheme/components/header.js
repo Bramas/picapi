@@ -35,13 +35,10 @@ module.exports = React.createClass({
 					<div className="collapse navbar-collapse" id="bs-example-navbar-collapse-6">
 						<ul className="nav navbar-nav">
 							<li className="active">
-								<a href="#">Home</a>
+								<Link to={'/'}>Home</Link>
 							</li>
 							<li>
-								<a href="#">Link</a>
-							</li>
-							<li>
-								<a href="#">Link</a>
+								<Link to={'/albums'}>Albums</Link>
 							</li>
 						</ul>
 					</div>

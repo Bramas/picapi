@@ -2,31 +2,74 @@
 
 var React = require('react');
 var ReactDOM = require('react-dom');
+import { DragSource } from 'react-dnd';
+import { connect } from 'react-redux'
+
 import { Link } from 'react-router'
 import api from '../api';
+import Photo from './photo';
+
+import { fetchAlbumPhotos } from '../actions';
 
 
 let AlbumView = React.createClass({
 	renderPhoto: function(photo) {
-		return  <div key={photo.id} className="jg-entry" title={photo.title}>
-					<img src={api.thumbUrl(photo)} />
-				</div>
+		return  <Photo key={photo.id} albumId={this.props.params.albumId} id={photo.id} title={photo.title} src={api.thumbUrl(photo)} />
 	},
 
-	componentDidUpdate: function() {
-		//$(ReactDOM.findDOMNode(this.refs['gallery'])).justifiedGallery();
-	},
 	componentDidMount: function() {
 		this.componentDidUpdate();
 	},
 
 	render: function() {
+		if(!this.props.photos)
+		{
+			return(<div>Loading...</div>);
+		}
+
 		return <div><div ref="gallery">{this.props.photos.map(this.renderPhoto)}</div><Link to={'/albums'}>retour</Link></div>;
+	},
+
+	componentDidUpdate(prevProps, prevState) {
+		if(!this.props.photos && !this.props.isFetching)
+		{
+  			console.log('album '+this.props.albumId+' not found => fetching')
+  			this.props.fetchAlbumPhotos(this.props.params.albumId);  
+  		}
 	}
 })
 
 
-module.exports = React.createClass({
+const mapStateToProps = (state, props) => {
+  var photos = [];
+  if(state.albums[props.params.albumId]) {
+  	return {
+		photos: state.albums[props.params.albumId].photos
+	}
+  }
+  return {
+  	photos: false,
+  	isFetching: state.isFetching
+  }
+}
+
+const mapDispatchToProps = (dispatch, props) => {
+  return {
+  	fetchAlbumPhotos: function(albumId) {
+  		dispatch(fetchAlbumPhotos(albumId))
+  	}
+  }
+}
+
+
+
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AlbumView);
+
+let Album = React.createClass({
 
   getInitialState () {
     return {
@@ -50,8 +93,7 @@ module.exports = React.createClass({
 
   },
   onDataReceived(data) {
-		console.log(data);
-		this.setState({photos: data});
+	this.setState({photos: data});
 		/*ReactDom.render(<Layout 
 			leftPane={<TreeTimeline data={timeline} onToggle={handleTreeClick}/>}
 			mainPane={<Album photos={photos} />} />, document.getElementById('main-container'))*/
@@ -69,4 +111,4 @@ module.exports = React.createClass({
 		return <AlbumView photos={this.state.photos}/>
 	}
 
-})
+});

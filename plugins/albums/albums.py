@@ -12,16 +12,41 @@ from picapi import photos, database
 
 class Album():
 
+	def smart(self, type):
+
+		db = database.connect()
+		cur = db.execute("""SELECT * FROM photos  WHERE id NOT IN (SELECT albums_photos.photo_id FROM albums_photos)""").fetchall()
+		db.close()
+		return success([photos.preparePhoto(dict(a)) for a in cur])
+
+
 	def get(self, id=None):
 		db = database.connect()
+		db.row_factory = database.row_factory(['album', 'cover'])
 		if id:
-			album = db.execute("SELECT * FROM albums where id=:id", {'id':id}).fetchone()
-			return success(dict(album))
+			album = db.execute("SELECT Album.*, '#', Photo.* FROM albums as Album LEFT JOIN photos as Photo ON Album.cover = Photo.id WHERE Album.id=:id", {'id':id}).fetchone()
+			
+			item = album['album']
+			if album['cover']['id']:
+				item['cover'] = photos.preparePhoto(album['cover'])
+			return success(item)
 
-		albums = db.execute("SELECT * FROM albums").fetchall()
-		print(albums)
+		albums = db.execute("SELECT Album.*, '#', Photo.* FROM albums as Album LEFT JOIN photos as Photo ON Album.cover = Photo.id").fetchall()
+
 		db.close()
-		return success([dict(a) for a in albums])
+		data = []
+		for album in albums:
+			item = album['album']
+			if album['cover']['id']:
+				item['cover'] = photos.preparePhoto(album['cover'])
+			data.append(item)
+		data.append({
+				'title':'unsorted',
+				'id':'unsorted',
+				'cover':None
+			})
+
+		return success(data)
 
 
 	def photos(self, id):
@@ -81,6 +106,11 @@ def albumsById(id):
 def albumsById(id):
 
 	return Album().photos(id)
+
+@app.route('/albums/<type:re:unsorted>/photos')
+def albumsById(type):
+
+	return Album().smart(type)
 
 @app.route('/photos/<id:int>/albums')
 def albumsByPhotos(id):

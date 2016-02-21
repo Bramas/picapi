@@ -2,7 +2,7 @@
 import bottle, exifread
 from PIL import Image
 from bottle import response, request
-import os, json, sys, sqlite3
+import os, json, sys, sqlite3, datetime, time, string, random
 from os import listdir
 from os.path import isfile, isdir, join
 
@@ -134,6 +134,7 @@ def add(filename, storage='local', storage_options=None, file = None):
 	width, height = 0, 0
 	filesize = 0
 	rating = None
+	captured_on = created_on = int(time.time())
 	if file:
 		im = Image.open(file)
 		width, height = im.size
@@ -151,8 +152,7 @@ def add(filename, storage='local', storage_options=None, file = None):
 			captured_on = datetime.datetime(year, month, day, hour, minute, second).timestamp()
 		if 'Rating' in metadata: rating = metadata['Rating']
 
-
-	created_on = int(time.time())
+	
 
 	secret = uid()
 	o_secret = uid()
@@ -216,6 +216,11 @@ def route_delete(id):
 		return delete(id.split(','))
 
 	return delete(id)
+
+
+@app.route('/photos', method='OPTIONS')
+def route_options_upload():
+	return success()
 
 
 @app.route('/photos', method='POST')

@@ -9,7 +9,8 @@ let AlbumsView = React.createClass({
 	renderAlbum: function(album) {
 		console.log(album);
 		return <div key={album.id} className="album-entry" title={album.title}>
-					<Link to={'/album/'+album.id}>{album.title}</Link>
+
+					<Link to={'/album/'+album.id}><img src={api.thumbUrl(album.cover)} />{album.title}</Link>
 				</div>
 	},
 

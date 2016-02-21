@@ -3,6 +3,25 @@
 <head>
 	<title>test</title>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/darkly/bootstrap.min.css">
+    <style type="text/css">
+    .album-entry a {
+        position: relative;
+        display: inline-block;
+    }
+    .album-entry a img {
+        width:100px;
+    }
+    .album-entry a span {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        display: block;
+        text-align: center;
+        width: 100%;
+        background: rgba(0,0,0,0.51);
+    }
+
+    </style>
 </head>
 <body>
 <!--
@@ -19,7 +38,6 @@
 </div>-->
 
 <div id="main-container"></div>
-<div id="loadingBar">loading</div>
 <script type="text/javascript" src="bundle.js"></script>
 </body>
 </html>
