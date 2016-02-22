@@ -13,8 +13,8 @@ import { fetchAlbumPhotos } from '../actions';
 
 
 let AlbumView = React.createClass({
-	renderPhoto: function(photo) {
-		return  <Photo key={photo.id} albumId={this.props.params.albumId} id={photo.id} title={photo.title} src={api.thumbUrl(photo)} />
+	renderPhoto: function(photoId) {
+		return  <Photo key={photoId} albumId={this.props.params.albumId} id={photoId} />
 	},
 
 	componentDidMount: function() {
@@ -41,7 +41,6 @@ let AlbumView = React.createClass({
 
 
 const mapStateToProps = (state, props) => {
-  var photos = [];
   if(state.albums[props.params.albumId]) {
   	return {
 		photos: state.albums[props.params.albumId].photos

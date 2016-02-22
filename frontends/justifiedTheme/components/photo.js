@@ -2,6 +2,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 import { DragSource } from 'react-dnd';
+import { connect } from 'react-redux'
 
 import { Link } from 'react-router'
 import api from '../api';
@@ -26,7 +27,6 @@ function collect(connect, monitor) {
     //isDragging: monitor.isDragging()
   };
 }
-
 let Photo = DragSource('photo', photoSource, collect)(React.createClass({
 	render: function() {
 		const { connectDragSource} = this.props;
@@ -35,5 +35,35 @@ let Photo = DragSource('photo', photoSource, collect)(React.createClass({
 				</div>);
 	}
 }));
-module.exports = Photo;
+
+
+// title={photo.title} src={api.thumbUrl(photo)} 
+
+const mapStateToProps = (state, props) => {
+  props
+  if(!state.photos[props.id]){
+    return {
+      title: 'unknown',
+      src  : api.thumbUrl({})
+    }
+  }
+  return {
+      title: state.photos[props.id].title,
+      src  : api.thumbUrl(state.photos[props.id])
+    }
+}
+
+const mapDispatchToProps = (dispatch, props) => {
+  return { }
+}
+
+
+
+
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Photo);
+
 

@@ -160,7 +160,7 @@ def add(filename, storage='local', storage_options=None, file = None):
 		'secret'        : secret,
 		'o_secret'      : o_secret,
 		'title'         : title,
-		'ext'           : ext,
+		'extension'           : ext,
 		'filesize'      : filesize,
 		'width'         : width,
 		'height'        : height,
@@ -170,21 +170,23 @@ def add(filename, storage='local', storage_options=None, file = None):
 		'captured_month': month,
 		'created_on'    : created_on,
 		'modified_on'   : created_on,
-		'rating'        : rating
+		'rating'        : rating,
+		'storage'		: storage
 	}
 
 
 	db = database.connect()
 	cursor = db.cursor()
 	cursor.execute("""INSERT INTO photos 
-		(secret, o_secret, title, extension, filesize, width, height, captured_on, captured_year, captured_month, created_on, modified_on, rating, metadata) VALUES 
-		(:secret, :o_secret, :title, :ext, :filesize, :width, :height, :captured_on, :captured_year, :captured_month, :created_on, :modified_on, :rating, :metadata )""", value)
+		(secret, o_secret, title, extension, filesize, width, height, captured_on, captured_year, captured_month, created_on, modified_on, rating, metadata, storage) VALUES 
+		(:secret, :o_secret, :title, :extension, :filesize, :width, :height, :captured_on, :captured_year, :captured_month, :created_on, :modified_on, :rating, :metadata, :storage )""", value)
 
 	id = cursor.lastrowid
 	if storages.stores[storage].save(id, secret, o_secret, ext, options=storage_options):
 		db.commit()
 		db.close()
-		return id
+		value['id'] = id
+		return preparePhoto(value)
 	else:
 		db.close()
 		return False
@@ -232,10 +234,10 @@ def route_post_upload():
 		upload.save(filepath)
 		return True
 		
-	id = add(upload.filename, file=upload.file, storage='local', storage_options={'save':save})
-	if not id:
+	photo = add(upload.filename, file=upload.file, storage='local', storage_options={'save':save})
+	if not photo:
 		return error()
-	return success({'id': id})
+	return success(photo)
 
 
 

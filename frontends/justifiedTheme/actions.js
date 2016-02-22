@@ -4,7 +4,9 @@
 export const ALBUM_MOVE_PHOTO = 'ALBUM_MOVE_PHOTO';
 export function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
   var api = require('./api');
-	api.delete('/albums/'+originAlbumId+'/photos/'+photoId, {});
+  if(originAlbumId)
+	  api.delete('/albums/'+originAlbumId+'/photos/'+photoId, {});
+  
 	api.post('/albums/'+destinationAlbumId+'/photos', {photo_id: photoId});
   return {
     type: ALBUM_MOVE_PHOTO,
@@ -13,6 +15,40 @@ export function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
     photoId
   }
 }
+
+export const ADD_PHOTO = 'ADD_PHOTO'
+export function addPhoto(p) {
+  return {
+    type: ADD_PHOTO,
+    photo: p
+  }
+}
+
+export const REQUEST_ALBUMS = 'REQUEST_ALBUMS'
+function requestAlbums() {
+  return {
+    type: REQUEST_ALBUMS
+  }
+}
+
+export const RECEIVE_ALBUMS = 'RECEIVE_ALBUMS'
+function receiveAlbums(albums) {
+  return {
+    type: RECEIVE_ALBUMS,
+    albums: albums,
+    receivedAt: Date.now()
+  }
+}
+
+export function fetchAlbums() {
+  var api = require('./api');
+  return dispatch => {
+    dispatch(requestAlbums())
+    api.get('/albums', {}, function(data){
+      dispatch(receiveAlbums(data))
+    });
+  }
+};
 
 
 export const REQUEST_ALBUM_PHOTOS = 'REQUEST_ALBUM_PHOTOS'

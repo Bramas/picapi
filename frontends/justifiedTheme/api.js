@@ -5,6 +5,7 @@
 import { createStore, applyMiddleware  } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 import reducerApp from './reducers'
+import { addPhoto, albumMovePhoto } from './actions'
 
 let api = {
 
@@ -63,7 +64,6 @@ api.call = function(cmd, method, params, callback) {
         }*/
 		params = this.objectToQueryString(params);
 	}
-	console.log(params)
 	request.send(params);
 
 }
@@ -126,4 +126,38 @@ api.objectToQueryString = function (a) {
     output = s.join("&").replace(r20, "+");
     return output;
 };
+api.sendFile = function(file, albumId) {
+        var uri = "http://localhost:8080/photos";
+        var xhr = new XMLHttpRequest();
+        var fd = new FormData();
+        xhr.open("POST", uri, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                // Handle response.
+                let p = JSON.parse(xhr.responseText); // handle response.
+                console.log(p);
+                console.log(albumId);
+                console.log(this);
+                api.store.dispatch(addPhoto(p))
+                api.store.dispatch(albumMovePhoto(false, albumId, p.id))
+
+            }
+        }//.bind(this, albumId);
+
+        xhr.upload.addEventListener("progress", function(e) {
+            if (e.lengthComputable) {
+              var percentage = Math.round((e.loaded * 100) / e.total);
+              console.log(percentage);
+            }
+          }, false);
+        fd.append('upload', file);
+        // Initiate a multipart/form-data upload
+        xhr.send(fd);  
+    }
+
+api.upload = function(files, albumId) {
+    for (var i=0; i<files.length; i++) {
+        this.sendFile(files[i], albumId);
+    }
+}
 module.exports = api;

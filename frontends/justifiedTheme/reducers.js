@@ -1,10 +1,11 @@
 
 import { combineReducers } from 'redux'
-import { REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO } from './actions'
+import { ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
 var Immutable = require('immutable');
 
 const initialState = {
-  albums: {},
+  albums: false,
+  photos: {},
   lastUpdated: Date.now(),
   isFetching: false
 }
@@ -19,25 +20,37 @@ function reducer(state, action) {
   state = state.toJS();
   switch (action.type) {
 	case ALBUM_MOVE_PHOTO:
-		let p = false;
 		if(state.albums[action.originAlbumId] && state.albums[action.originAlbumId].photos)
 		{
 			for(var i = state.albums[action.originAlbumId].photos.length - 1; i >= 0; i--) {
-			    if(state.albums[action.originAlbumId].photos[i].id === action.photoId) {
-			    	p = state.albums[action.originAlbumId].photos[i]
+			    if(state.albums[action.originAlbumId].photos[i] === action.photoId) {
 			        state.albums[action.originAlbumId].photos.splice(i, 1);
 			    }
 			}
 			
 		}
-		if(state.albums[action.destinationAlbumId] && state.albums[action.destinationAlbumId].photos && p)
+		if(state.albums[action.destinationAlbumId] && state.albums[action.destinationAlbumId].photos)
 		{
-			state.albums[action.destinationAlbumId].photos.push(p);
+			state.albums[action.destinationAlbumId].photos.push(action.photoId);
 		}
 	    return state;
+	case REQUEST_ALBUMS:
+	  state.isFetching = true;
+	  return state;
 	case REQUEST_ALBUM_PHOTOS:
 	  state.isFetching = true;
 	  return state;
+	case ADD_PHOTO:
+		state.photos[action.photo.id] = action.photo
+		return state;
+	case RECEIVE_ALBUMS:
+		state.isFetching = false;
+		state.lastUpdated = action.receivedAt;
+		state.albums = {};
+		for(var o in action.albums) {
+			state.albums[action.albums[o].id] = action.albums[o];
+		}
+		return state;
 	case RECEIVE_ALBUM_PHOTOS:
 		state.isFetching = false;
 		state.lastUpdated = action.receivedAt;
@@ -48,8 +61,11 @@ function reducer(state, action) {
 		if(!state.albums[action.albumId].photos) {
 			state.albums[action.albumId].photos = [];
 		}
+		for(var i in action.photos) {
+			state.albums[action.albumId].photos.push(action.photos[i].id);
+			state.photos[action.photos[i].id] = action.photos[i];
+		}
 		
-		state.albums[action.albumId].photos = action.photos;
 	    return state;
 	default:
 		return state; 

@@ -3,11 +3,13 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 import { Link } from 'react-router'
+import { connect } from 'react-redux'
 import api from '../api';
+import { fetchAlbums } from '../actions';
 
 let AlbumsView = React.createClass({
-	renderAlbum: function(album) {
-		console.log(album);
+	renderAlbum: function(albumId) {
+    let album = this.props.albums[albumId];
 		return <div key={album.id} className="album-entry" title={album.title}>
 
 					<Link to={'/album/'+album.id}><img src={api.thumbUrl(album.cover)} />{album.title}</Link>
@@ -22,41 +24,44 @@ let AlbumsView = React.createClass({
 	},
 
 	render: function() {
-		return <div>{this.props.albums.map(this.renderAlbum)}</div>;
+    if(!this.props.albums){
+      return <div>Loading</div>;
+    }
+		return <div>{Object.keys(this.props.albums).map(this.renderAlbum)}</div>;
 	}
 })
 
-
-module.exports = React.createClass({
-
-  getInitialState () {
+const mapStateToProps = (state, props) => {
+  if(state.albums) {
     return {
-      albums: []
+      albums: state.albums,
+      isFetching: state.isFetching
     }
-  },
-
-  componentDidMount () {
-    // fetch data initially in scenario 2 from above
-    this.fetchInvoice()
-  },
-
-  componentDidUpdate (prevProps) {
-   
-  },
-
-  componentWillUnmount () {
-
-  },
-  onDataReceived(data) {
-
-    console.log(data)
-  	this.setState({albums: data})
-  },
-  fetchInvoice () {
-    api.get('/albums', {}, this.onDataReceived);
-  },
-  render () {
-    return <AlbumsView albums={this.state.albums}/>
   }
+  return {
+    albums: false,
+    isFetching: state.isFetching
+  }
+}
 
-})
+const mapDispatchToProps = (dispatch) => {
+  return {
+    fetchAlbums: function() {
+      dispatch(fetchAlbums())
+    }
+  }
+}
+
+const mergeProps = (stateProps, dispatchProps, props) => {
+  if(!stateProps.albums && !stateProps.isFetching) {
+    dispatchProps.fetchAlbums();
+  }
+  return Object.assign({}, stateProps, dispatchProps, props);
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
+)(AlbumsView);
+

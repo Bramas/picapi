@@ -7,8 +7,9 @@ import api from '../api';
 import { connect } from 'react-redux'
 
 import { DropTarget } from 'react-dnd';
+import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 
-import { albumMovePhoto } from '../actions';
+import { albumMovePhoto, fetchAlbums } from '../actions';
 
 
 const linkTarget = {
@@ -19,6 +20,10 @@ const linkTarget = {
   drop(props, monitor, component) {
     if(!monitor.getItem().photoId)
     {
+      if(monitor.getItem().files)
+      {
+        api.upload(monitor.getItem().files, props.id);
+      }
       return;
     }
     var photoId = monitor.getItem().photoId;
@@ -66,7 +71,7 @@ let AlbumLink = React.createClass({
 });
 
 
-AlbumLink = DropTarget('photo', linkTarget, collect)
+AlbumLink = DropTarget(['photo', NativeTypes.FILE], linkTarget, collect)
 (AlbumLink);
 
 
@@ -77,7 +82,8 @@ AlbumLink = connect(
 
 
 let ListAlbumsView = React.createClass({
-	renderAlbum: function(album) {
+	renderAlbum: function(albumId) {
+    let album = this.props.albums[albumId];
 		return <li key={album.id} className="list-album-entry" title={album.title}>
 
 					<AlbumLink id={album.id} to={'/album/'+album.id} title={album.title} />
@@ -92,40 +98,38 @@ let ListAlbumsView = React.createClass({
 	},
 
 	render: function() {
-		return <ul>{this.props.albums.map(this.renderAlbum)}</ul>;
-	}
-})
-
-
-module.exports = React.createClass({
-
-  getInitialState () {
-    return {
-      albums: []
+    if(!this.props.albums) {
+      return <div>Loading...</div>
     }
-  },
+		return <ul>{Object.keys(this.props.albums).map(this.renderAlbum)}</ul>;
+	}
+});
 
-  componentDidMount () {
-    // fetch data initially in scenario 2 from above
-    this.fetchInvoice()
-  },
 
-  componentDidUpdate (prevProps) {
-   
-  },
-
-  componentWillUnmount () {
-
-  },
-  onDataReceived(data) {
-
-  	this.setState({albums: data})
-  },
-  fetchInvoice () {
-    api.get('/albums', {}, this.onDataReceived);
-  },
-  render () {
-    return <ListAlbumsView albums={this.state.albums}/>
+const mapStateToProps2 = (state, props) => {
+  if(state.albums) {
+    return {
+      albums: state.albums,
+      isFetching: state.isFetching
+    }
   }
+  return {
+    albums: false,
+    isFetching: state.isFetching
+  }
+}
 
-})
+const mapDispatchToProps2 = (dispatch, props) => {
+  if(!props.albums && !props.isFetching) {
+    dispatch(fetchAlbums());
+  }
+  return {
+    fetchAlbums: function() {
+      dispatch(fetchAlbums())
+    }
+  }
+}
+export default connect(
+  mapStateToProps2,
+  mapDispatchToProps2
+)(ListAlbumsView);

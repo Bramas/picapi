@@ -25,7 +25,7 @@ class Album():
 		db.row_factory = database.row_factory(['album', 'cover'])
 		if id:
 			album = db.execute("SELECT Album.*, '#', Photo.* FROM albums as Album LEFT JOIN photos as Photo ON Album.cover = Photo.id WHERE Album.id=:id", {'id':id}).fetchone()
-			
+			print(album)
 			item = album['album']
 			if album['cover']['id']:
 				item['cover'] = photos.preparePhoto(album['cover'])
