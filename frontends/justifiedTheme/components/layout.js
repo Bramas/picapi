@@ -15,10 +15,12 @@ class Layout extends React.Component {
     }
     
     render() {
-        return <div id="dropzone">
+        return <div>
         	<Header />
-            <ListAlbums />
-	        <div className="container">{this.props.children}</div>
+            <div className="container">
+                <div className="col-md-3"><ListAlbums  /></div>
+                <div className="col-md-9">{this.props.children}</div>
+            </div>
 	    </div>;
     }
 }

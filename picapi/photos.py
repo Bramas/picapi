@@ -27,9 +27,16 @@ def uid(length = 30):
 
 def preparePhoto(photo):
 	if 'o_secret' not in photo: photo['o_secret'] = None
+	attachments = '{}'
+	if 'attachments' in photo and photo['attachments']: attachments = photo['attachments']
+	attachments = json.loads(attachments)
+	for i in attachments:
+		attachments[i] = storages.stores[photo['storage']].urlAttachment(photo['id'], attachments[i])
+
 	data = {
 		'id'  : photo['id'],
 		'title': photo['title'],
+		'attachments': attachments,
 		'url_info' : storages.stores[photo['storage']].url_info(
 			photo['id'],
 			photo['secret'], 
@@ -45,7 +52,7 @@ def get(id=None):
 		photo = db.execute("SELECT * FROM photos where id=:id", {'id':id}).fetchone()
 		return success(preparePhoto(dict(photo)))
 
-	photos = db.execute("SELECT id, title, secret, extension, storage FROM photos").fetchall()
+	photos = db.execute("SELECT id, title, secret, extension, storage, attachments FROM photos").fetchall()
 	db.close()
 	return success([preparePhoto(dict(row)) for row in photos])
 
@@ -126,6 +133,9 @@ def add(filename, storage='local', storage_options=None, file = None):
 	title, ext  = os.path.splitext(filename)
 	ext = ext.lower()
 	if ext not in config.Config.AllowedExtensions:
+		ret = plugins.run_hook('handle_file_upload', False, filename=filename, storage=storage, storage_options=storage_options, file=file)
+		if ret:
+			return ret
 		return error('File extension not allowed')
 
 	tags = []
@@ -193,6 +203,12 @@ def add(filename, storage='local', storage_options=None, file = None):
 	
 
 
+@app.route('/static_attachement/<filename>', skip=[plugins.pluginWrapper])
+def route_static_attachments(filename):
+	response.set_header('Content-Type', 'application/octet-stream');
+	response.set_header('Content-Disposition', 'attachment; filename="' + filename + '"');
+	print('download', filename, isfile(join(config.Path.Attachments, filename)))
+	return open(join(config.Path.Attachments, filename), 'rb')
 
 @app.route('/o_static/<filename>', skip=[plugins.pluginWrapper])
 def route_o_static(filename):

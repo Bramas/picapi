@@ -6,6 +6,7 @@ class Config:
 
 class Path:
 	Uploads = join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'photos', 'uploads')
+	Attachments = join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'attachments')
 	Data = join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
 	Plugins = join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'plugins')
 	Root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

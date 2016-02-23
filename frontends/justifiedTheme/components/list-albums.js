@@ -84,8 +84,10 @@ AlbumLink = connect(
 let ListAlbumsView = React.createClass({
 	renderAlbum: function(albumId) {
     let album = this.props.albums[albumId];
-		return <li key={album.id} className="list-album-entry" title={album.title}>
+    let badge = album.photos ? <span className="badge">{album.photos.length}</span> : '';
 
+		return <li key={album.id} className="list-album-entry list-group-item" title={album.title}>
+          {badge}
 					<AlbumLink id={album.id} to={'/album/'+album.id} title={album.title} />
 				</li>
 	},
@@ -101,7 +103,7 @@ let ListAlbumsView = React.createClass({
     if(!this.props.albums) {
       return <div>Loading...</div>
     }
-		return <ul>{Object.keys(this.props.albums).map(this.renderAlbum)}</ul>;
+		return <ul className="list-group">{Object.keys(this.props.albums).map(this.renderAlbum)}</ul>;
 	}
 });
 

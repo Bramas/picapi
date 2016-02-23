@@ -12,6 +12,20 @@ class LocalStorage():
 		Store the photo in the local directory data/photos/uploads
 	"""
 	
+	def saveAttachment(self, id, filename, options=None):
+		filename = str(id)+'_'+filename
+
+		if 'save' in options:
+			options['save'](config.Path.Attachments, filename)
+		else:
+			return False
+
+		return True
+	def urlAttachment(self, id, filename):
+		filename = str(id)+'_'+filename
+		
+		return 'http://localhost:8080/static_attachement/'+filename
+
 	def save(self, id, secret, o_secret, ext, options=None):
 		o_filename = str(id) + '_' + secret + '_' + o_secret + ext
 		if 'save' in options:

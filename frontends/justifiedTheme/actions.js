@@ -6,7 +6,7 @@ export function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
   var api = require('./api');
   if(originAlbumId)
 	  api.delete('/albums/'+originAlbumId+'/photos/'+photoId, {});
-  
+
 	api.post('/albums/'+destinationAlbumId+'/photos', {photo_id: photoId});
   return {
     type: ALBUM_MOVE_PHOTO,
@@ -15,6 +15,16 @@ export function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
     photoId
   }
 }
+
+export const ADD_ATTACHMENTS = 'ADD_ATTACHMENTS'
+export function addAttachements(id, attachments) {
+  return {
+    type: ADD_ATTACHMENTS,
+    id,
+    attachments
+  }
+}
+
 
 export const ADD_PHOTO = 'ADD_PHOTO'
 export function addPhoto(p) {

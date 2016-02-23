@@ -28,10 +28,14 @@ function collect(connect, monitor) {
   };
 }
 let Photo = DragSource('photo', photoSource, collect)(React.createClass({
+  renderAttachements: function(k) {
+    return <div key={k}><a href={this.props.photo.attachments[k]} >{k}</a></div>
+  },
 	render: function() {
 		const { connectDragSource} = this.props;
-		return  connectDragSource(<div className="jg-entry">
+		return  connectDragSource(<div className="photo">
 					<img src={this.props.src}  title={this.props.title}/><span>{this.props.title}</span>
+          <div>{Object.keys(this.props.photo.attachments).map(this.renderAttachements)}</div>
 				</div>);
 	}
 }));
@@ -44,12 +48,14 @@ const mapStateToProps = (state, props) => {
   if(!state.photos[props.id]){
     return {
       title: 'unknown',
-      src  : api.thumbUrl({})
+      src  : api.thumbUrl({}),
+      photo: {}
     }
   }
   return {
       title: state.photos[props.id].title,
-      src  : api.thumbUrl(state.photos[props.id])
+      src  : api.thumbUrl(state.photos[props.id]),
+      photo: state.photos[props.id]
     }
 }
 

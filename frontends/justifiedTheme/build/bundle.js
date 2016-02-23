@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.albumMovePhoto = albumMovePhoto;
+exports.addAttachements = addAttachements;
 exports.addPhoto = addPhoto;
 exports.fetchAlbums = fetchAlbums;
 exports.fetchAlbumPhotos = fetchAlbumPhotos;
@@ -19,6 +20,15 @@ function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
     originAlbumId: originAlbumId,
     destinationAlbumId: destinationAlbumId,
     photoId: photoId
+  };
+}
+
+var ADD_ATTACHMENTS = exports.ADD_ATTACHMENTS = 'ADD_ATTACHMENTS';
+function addAttachements(id, attachments) {
+  return {
+    type: ADD_ATTACHMENTS,
+    id: id,
+    attachments: attachments
   };
 }
 
@@ -231,11 +241,13 @@ api.sendFile = function (file, albumId) {
         if (xhr.readyState == 4 && xhr.status == 200) {
             // Handle response.
             var p = JSON.parse(xhr.responseText); // handle response.
-            console.log(p);
-            console.log(albumId);
-            console.log(this);
-            api.store.dispatch((0, _actions.addPhoto)(p));
-            api.store.dispatch((0, _actions.albumMovePhoto)(false, albumId, p.id));
+            if (p.title) {
+                api.store.dispatch((0, _actions.addPhoto)(p));
+                api.store.dispatch((0, _actions.albumMovePhoto)(false, albumId, p.id));
+            }
+            if (p.attachments) {
+                api.store.dispatch((0, _actions.addAttachments)(p.id, p.attachments));
+            }
         }
     }; //.bind(this, albumId);
 
@@ -634,13 +646,21 @@ var Layout = function (_React$Component) {
         value: function render() {
             return _react2.default.createElement(
                 'div',
-                { id: 'dropzone' },
+                null,
                 _react2.default.createElement(_header2.default, null),
-                _react2.default.createElement(_listAlbums2.default, null),
                 _react2.default.createElement(
                     'div',
                     { className: 'container' },
-                    this.props.children
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-md-3' },
+                        _react2.default.createElement(_listAlbums2.default, null)
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-md-9' },
+                        this.props.children
+                    )
                 )
             );
         }
@@ -792,9 +812,16 @@ var ListAlbumsView = React.createClass({
 
   renderAlbum: function renderAlbum(albumId) {
     var album = this.props.albums[albumId];
+    var badge = album.photos ? React.createElement(
+      'span',
+      { className: 'badge' },
+      album.photos.length
+    ) : '';
+
     return React.createElement(
       'li',
-      { key: album.id, className: 'list-album-entry', title: album.title },
+      { key: album.id, className: 'list-album-entry list-group-item', title: album.title },
+      badge,
       React.createElement(AlbumLink, { id: album.id, to: '/album/' + album.id, title: album.title })
     );
   },
@@ -816,7 +843,7 @@ var ListAlbumsView = React.createClass({
     }
     return React.createElement(
       'ul',
-      null,
+      { className: 'list-group' },
       Object.keys(this.props.albums).map(this.renderAlbum)
     );
   }
@@ -889,17 +916,33 @@ function collect(connect, monitor) {
 var Photo = (0, _reactDnd.DragSource)('photo', photoSource, collect)(React.createClass({
   displayName: 'Photo',
 
+  renderAttachements: function renderAttachements(k) {
+    return React.createElement(
+      'div',
+      { key: k },
+      React.createElement(
+        'a',
+        { href: this.props.photo.attachments[k] },
+        k
+      )
+    );
+  },
   render: function render() {
     var connectDragSource = this.props.connectDragSource;
 
     return connectDragSource(React.createElement(
       'div',
-      { className: 'jg-entry' },
+      { className: 'photo' },
       React.createElement('img', { src: this.props.src, title: this.props.title }),
       React.createElement(
         'span',
         null,
         this.props.title
+      ),
+      React.createElement(
+        'div',
+        null,
+        Object.keys(this.props.photo.attachments).map(this.renderAttachements)
       )
     ));
   }
@@ -912,12 +955,14 @@ var mapStateToProps = function mapStateToProps(state, props) {
   if (!state.photos[props.id]) {
     return {
       title: 'unknown',
-      src: _api2.default.thumbUrl({})
+      src: _api2.default.thumbUrl({}),
+      photo: {}
     };
   }
   return {
     title: state.photos[props.id].title,
-    src: _api2.default.thumbUrl(state.photos[props.id])
+    src: _api2.default.thumbUrl(state.photos[props.id]),
+    photo: state.photos[props.id]
   };
 };
 
@@ -37413,6 +37458,12 @@ function reducer(state, action) {
 			return state;
 		case _actions.ADD_PHOTO:
 			state.photos[action.photo.id] = action.photo;
+			return state;
+		case _actions.ADD_ATTACHMENTS:
+			if (!state.photos[action.id]) {
+				state.photos[action.id] = { id: action.id, title: 'unknown' };
+			}
+			state.photos[action.id]['attachments'] = action.attachments;
 			return state;
 		case _actions.RECEIVE_ALBUMS:
 			state.isFetching = false;

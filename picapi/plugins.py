@@ -32,6 +32,7 @@ def trigger_filter(name, value, *args,**kwargs):
 
 			nextValue = func(value, *args, **kwargs)
 
+			if debug_hook_calls: log.info('plugins::trigger_filter: '+str(name)+ ' ('+str(value)+' => '+str(nextValue)+')')
 			# if it is a tuple, and the second value is true, then we don't evaluate the other rules 
 			if isinstance(nextValue, tuple) and len(nextValue) == 2 and nextValue[1]:
 				return nextValue[0]

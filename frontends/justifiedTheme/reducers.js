@@ -1,6 +1,6 @@
 
 import { combineReducers } from 'redux'
-import { ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
+import { ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
 var Immutable = require('immutable');
 
 const initialState = {
@@ -43,6 +43,13 @@ function reducer(state, action) {
 	case ADD_PHOTO:
 		state.photos[action.photo.id] = action.photo
 		return state;
+	case ADD_ATTACHMENTS:
+		if(!state.photos[action.id])
+		{
+			state.photos[action.id] = {id: action.id, title:'unknown'};
+		}
+		state.photos[action.id]['attachments'] = action.attachments;
+		return state
 	case RECEIVE_ALBUMS:
 		state.isFetching = false;
 		state.lastUpdated = action.receivedAt;

@@ -5,7 +5,7 @@
 import { createStore, applyMiddleware  } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 import reducerApp from './reducers'
-import { addPhoto, albumMovePhoto } from './actions'
+import { addPhoto, albumMovePhoto, addAttachments } from './actions'
 
 let api = {
 
@@ -135,11 +135,14 @@ api.sendFile = function(file, albumId) {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 // Handle response.
                 let p = JSON.parse(xhr.responseText); // handle response.
-                console.log(p);
-                console.log(albumId);
-                console.log(this);
-                api.store.dispatch(addPhoto(p))
-                api.store.dispatch(albumMovePhoto(false, albumId, p.id))
+                if(p.title) {
+                	api.store.dispatch(addPhoto(p))
+                	api.store.dispatch(albumMovePhoto(false, albumId, p.id))
+                }
+                if(p.attachments) {
+                	api.store.dispatch(addAttachments(p.id, p.attachments))
+                }
+                
 
             }
         }//.bind(this, albumId);
