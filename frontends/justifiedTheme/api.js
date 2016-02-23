@@ -10,10 +10,9 @@ import { addPhoto, albumMovePhoto, addAttachments, startUploads, uploadFinished 
 let api = {
 
 	token   : false,
-	path    : 'http://localhost:8080',
 	onError : function(e){ console.log(e); },
-	store   : createStore(reducerApp, undefined, applyMiddleware(thunkMiddleware))
-
+	store   : createStore(reducerApp, undefined, applyMiddleware(thunkMiddleware)),
+	config  : false
 }
 
 
@@ -34,7 +33,7 @@ api.call = function(cmd, method, params, callback) {
 	}
 
 	var request = new XMLHttpRequest();
-	request.open(method, api.path+cmd, true);
+	request.open(method, api.config.host+cmd, true);
 
 	request.onload = function() {
 	  if (request.status >= 200 && request.status < 400) {
@@ -79,8 +78,26 @@ api.delete = function(cmd, params, callback) {
 }
 
 api.init = function(callback){
+	var request = new XMLHttpRequest();
+	request.open('GET', 'config.json', true);
 
-	api.get('/authenticate?code=sdfsdf&client_id=qsdfsdf&grant_type=password',{}, callback);
+	request.onload = function() {
+	  if (request.status >= 200 && request.status < 400) {
+	    // Success!
+	    var resp = request.responseText;
+	    api.config = JSON.parse(resp);
+	    api.get('/authenticate?code=sdfsdf&client_id=qsdfsdf&grant_type=password',{}, callback);
+	  } else {
+	    // We reached our target server, but it returned an error
+	    console.log('error')
+	  }
+	};
+
+	request.onerror = function() {
+	  // There was a connection error of some sort
+	};
+	request.send();
+	
 }
 
 
