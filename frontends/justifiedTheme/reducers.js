@@ -1,7 +1,8 @@
 
 import { combineReducers } from 'redux'
-import { UPLOAD_FINISHED, START_UPLOADS, ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
+import { CREATE_ALBUM, UPLOAD_FINISHED, START_UPLOADS, ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
 var Immutable = require('immutable');
+
 
 const initialState = {
   albums: false,
@@ -51,7 +52,8 @@ function reducer(state, action) {
 			    }
 			}
    		return state;
-
+   	case CREATE_ALBUM:
+   		return state;
 	case START_UPLOADS:
 		for (var i=0; i<action.files.length; i++) {
     	    state.uploadQueue.push({

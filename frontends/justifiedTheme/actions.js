@@ -15,6 +15,16 @@ export function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
     photoId
   }
 }
+export const CREATE_ALBUM = 'CREATE_ALBUM'
+export function createAlbum(title) {
+
+  var api = require('./api');
+  api.post('/albums', {title: title}, function(data) { console.log('NEW: '); console.log(data)});
+  return {
+    type: CREATE_ALBUM,
+    title
+  }
+}
 
 export const UPLOAD_FINISHED = 'UPLOAD_FINISHED'
 export function uploadFinished(name) {

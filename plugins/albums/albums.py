@@ -131,7 +131,7 @@ def albumsByPhotos(id):
 @app.route('/albums', method='POST')
 def albumsPost():
 
-	return Album().add(request.params['name'])
+	return Album().add(request.params['title'])
 
 @app.route('/albums/<id:int>/photos', method='POST')
 def albumsPhotosPost(id):

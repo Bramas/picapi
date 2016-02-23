@@ -9,8 +9,8 @@ import { connect } from 'react-redux'
 import { DropTarget } from 'react-dnd';
 import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 
-import { albumMovePhoto, fetchAlbums } from '../actions';
-
+import { albumMovePhoto, fetchAlbums, createAlbum } from '../actions';
+var basicModal = require('basicmodal');
 
 const linkTarget = {
   canDrop(props) {
@@ -98,12 +98,37 @@ let ListAlbumsView = React.createClass({
 	componentDidMount: function() {
 		this.componentDidUpdate();
 	},
+  newAlbum: function() {
+        basicModal.show({
+        body: `
+              <p><strong>New Album</strong></p>
+              <input class="basicModal__text" type="text" placeholder="Album Title" name="title">
+              `,
+        class: basicModal.THEME.small,
+        closable: true,
+        buttons: {
+            cancel: {
+                class: basicModal.THEME.xclose,
+                fn: basicModal.close
+            },
+            action: {
+                title: 'Login',
+                fn: function(data) {
+                   this.props.createAlbum(data.title);
+                }.bind(this)
+            }
+        }
+    });
+  },
 
 	render: function() {
     if(!this.props.albums) {
       return <div>Loading...</div>
     }
-		return <ul className="list-group">{Object.keys(this.props.albums).map(this.renderAlbum)}</ul>;
+		return <div>
+      <ul className="list-group">{Object.keys(this.props.albums).map(this.renderAlbum)}</ul>
+      <div onClick={this.newAlbum}>Nouvel Album</div>
+    </div>;
 	}
 });
 
@@ -128,6 +153,9 @@ const mapDispatchToProps2 = (dispatch, props) => {
   return {
     fetchAlbums: function() {
       dispatch(fetchAlbums())
+    },
+    createAlbum: function(title) {
+      dispatch(createAlbum(title))
     }
   }
 }
