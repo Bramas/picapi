@@ -16,6 +16,23 @@ export function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
   }
 }
 
+export const UPLOAD_FINISHED = 'UPLOAD_FINISHED'
+export function uploadFinished(name) {
+  return {
+    type: UPLOAD_FINISHED,
+    name
+  }
+}
+
+export const START_UPLOADS = 'START_UPLOADS'
+export function startUploads(files, albumId) {
+  return {
+    type: START_UPLOADS,
+    files,
+    albumId
+  }
+}
+
 export const ADD_ATTACHMENTS = 'ADD_ATTACHMENTS'
 export function addAttachements(id, attachments) {
   return {
