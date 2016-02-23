@@ -67,15 +67,15 @@ class Album():
 		db.close()
 		return success([dict(a) for a in cur])
 
-	def add(self, name):
+	def add(self, title):
 		created_on = int(time.time())
 		value = {
-			'name'       : name,
+			'title'       : title,
 			'created_on' : created_on,
 			'modified_on': created_on
 		}
 		db = database.connect()
-		cur = db.execute("INSERT INTO albums (name, created_on, modified_on) VALUES (:name, :created_on, :modified_on)", value)
+		cur = db.execute("INSERT INTO albums (title, created_on, modified_on) VALUES (:title, :created_on, :modified_on)", value)
 		db.commit()
 		db.close()
 		return success({'id': cur.lastrowid})
