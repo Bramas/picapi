@@ -115,6 +115,7 @@ let ListAlbumsView = React.createClass({
                 title: 'Login',
                 fn: function(data) {
                    this.props.createAlbum(data.title);
+                   basicModal.close();
                 }.bind(this)
             }
         }

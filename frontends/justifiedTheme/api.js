@@ -144,7 +144,7 @@ api.objectToQueryString = function (a) {
     return output;
 };
 api.sendFile = function(file, albumId) {
-        var uri = "http://localhost:8080/photos";
+        var uri = api.config.host + "/photos";
         var xhr = new XMLHttpRequest();
         var fd = new FormData();
         xhr.open("POST", uri, true);

@@ -53,6 +53,7 @@ function reducer(state, action) {
 			}
    		return state;
    	case CREATE_ALBUM:
+   		state.albums[action.album.id] = action.album;
    		return state;
 	case START_UPLOADS:
 		for (var i=0; i<action.files.length; i++) {
