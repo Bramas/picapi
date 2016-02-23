@@ -1,4 +1,5 @@
 from . import config
+from .app import app
 
 import os
 from os import listdir
@@ -24,7 +25,7 @@ class LocalStorage():
 	def urlAttachment(self, id, filename):
 		filename = str(id)+'_'+filename
 		
-		return 'http://localhost:8080/static_attachement/'+filename
+		return app.config['host']+'/static_attachement/'+filename
 
 	def save(self, id, secret, o_secret, ext, options=None):
 		o_filename = str(id) + '_' + secret + '_' + o_secret + ext
@@ -47,11 +48,11 @@ class LocalStorage():
 
 	def url_info(self, id, secret, o_secret, ext):
 		info = {
-			'base'     : 'http://localhost:8080/static/'+str(id) + '_' + secret,
+			'base'     : app.config['host']+'/static/'+str(id) + '_' + secret,
 			'extension': ext
 		}
 		if o_secret:
-			info['original'] = 'http://localhost:8080/o_static/'+str(id) + '_' + secret+o_secret+ext
+			info['original'] = app.config['host']+'/o_static/'+str(id) + '_' + secret+o_secret+ext
 		return info
 
 

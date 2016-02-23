@@ -29,12 +29,15 @@ var CREATE_ALBUM = exports.CREATE_ALBUM = 'CREATE_ALBUM';
 function createAlbum(title) {
 
   var api = require('./api');
-  api.post('/albums', { title: title }, function (data) {
-    console.log('NEW: ');console.log(data);
-  });
-  return {
-    type: CREATE_ALBUM,
-    title: title
+  return function (dispatch) {
+    api.post('/albums', { title: title }, function (data) {
+      console.log('NEW: ');console.log(data);
+      data['title'] = title;
+      dispatch({
+        type: CREATE_ALBUM,
+        album: data
+      });
+    });
   };
 }
 
@@ -281,7 +284,7 @@ api.objectToQueryString = function (a) {
     return output;
 };
 api.sendFile = function (file, albumId) {
-    var uri = "http://localhost:8080/photos";
+    var uri = api.config.host + "/photos";
     var xhr = new XMLHttpRequest();
     var fd = new FormData();
     xhr.open("POST", uri, true);
@@ -903,6 +906,7 @@ var ListAlbumsView = React.createClass({
           title: 'Login',
           fn: function (data) {
             this.props.createAlbum(data.title);
+            basicModal.close();
           }.bind(this)
         }
       }
@@ -37622,6 +37626,7 @@ function reducer(state, action) {
 			}
 			return state;
 		case _actions.CREATE_ALBUM:
+			state.albums[action.album.id] = action.album;
 			return state;
 		case _actions.START_UPLOADS:
 			for (var i = 0; i < action.files.length; i++) {
