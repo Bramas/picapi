@@ -12,6 +12,8 @@ import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 import { albumMovePhoto, fetchAlbums, createAlbum } from '../actions';
 var basicModal = require('basicmodal');
 
+import Context from './context';
+
 const linkTarget = {
   canDrop(props) {
     return true;
@@ -63,10 +65,20 @@ const mapDispatchToProps = (dispatch, props) => {
 
 
 let AlbumLink = React.createClass({
+
+  contextMenu:  [
+        { title: 'Rename', icon: 'ion-plus-round', fn: c => console.log(c) },
+        { },
+        { title: 'Delete', icon: 'ion-person', fn: c => console.log(c)  },
+  ],
   render() {
     var connectDropTarget = this.props.connectDropTarget;
     var a = this.props.isOver ? '+': '';
-      return connectDropTarget(<div><Link to={this.props.to}>{this.props.title}</Link>{a}</div>);
+      return connectDropTarget(<div>
+        <Context items={this.contextMenu}>
+          <div><Link to={this.props.to}>{this.props.title}</Link>{a}</div>
+        </Context>
+      </div>);
   }
 });
 
@@ -88,12 +100,12 @@ let ListAlbumsView = React.createClass({
 
 		return <li key={album.id} className="list-album-entry list-group-item" title={album.title}>
           {badge}
-					<AlbumLink id={album.id} to={'/album/'+album.id} title={album.title} />
-				</li>
+					  <AlbumLink id={album.id} to={'/album/'+album.id} title={album.title} />
+          </li>
 	},
 
 	componentDidUpdate: function() {
-		//$(ReactDOM.findDOMNode(this)).justifiedGallery();
+
 	},
 	componentDidMount: function() {
 		this.componentDidUpdate();
@@ -112,7 +124,7 @@ let ListAlbumsView = React.createClass({
                 fn: basicModal.close
             },
             action: {
-                title: 'Login',
+                title: 'Create Album',
                 fn: function(data) {
                    this.props.createAlbum(data.title);
                    basicModal.close();
