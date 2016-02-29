@@ -7,8 +7,16 @@ import thunkMiddleware from 'redux-thunk'
 import reducerApp from './reducers'
 import { addPhoto, albumMovePhoto, addAttachments, startUploads, uploadFinished } from './actions'
 
-let api = {
+import injectTapEventPlugin from 'react-tap-event-plugin';
 
+// Needed for onTouchTap
+// Can go away when react 1.0 release
+// Check this repo:
+// https://github.com/zilverline/react-tap-event-plugin
+injectTapEventPlugin();
+
+let api = {
+	history: null,
 	token   : false,
 	onError : function(e){ console.log(e); },
 	store   : createStore(reducerApp, undefined, applyMiddleware(thunkMiddleware)),
@@ -21,16 +29,16 @@ api.thumbUrl = function(photo) {
 		return photo['url_info']['base'] + photo['url_info']['extension'];
 	return 'http://placehold.it/300x200';
 }
-api.call = function(cmd, method, params, callback) {
+api.call = function(cmd, method, params, callback, error) {
 
 	const success = (data) => {
 		if(callback)
 			callback(data)
 	}
 
-	const error = (jqXHR, textStatus, errorThrown) => {
+	/*const error = (jqXHR, textStatus, errorThrown) => {
 		console.log('Server error or API not found.', params, errorThrown)
-	}
+	}*/
 
 	var request = new XMLHttpRequest();
 	request.open(method, api.config.host+cmd, true);
@@ -46,9 +54,8 @@ api.call = function(cmd, method, params, callback) {
 	  }
 	};
 
-	request.onerror = function() {
-	  // There was a connection error of some sort
-	};
+	request.onerror = error;
+	
 	if("string" != typeof params)
 	{
 		/*
@@ -67,17 +74,21 @@ api.call = function(cmd, method, params, callback) {
 
 }
 
-api.get = function(cmd, params, callback) {
-	return this.call(cmd, 'GET', params, callback);
+api.get = function(cmd, params, callback, error) {
+	return this.call(cmd, 'GET', params, callback, error);
 }
-api.post = function(cmd, params, callback) {
-	return this.call(cmd, 'POST', params, callback);
+api.put = function(cmd, params, callback, error) {
+	return this.call(cmd, 'PUT', params, callback, error);
 }
-api.delete = function(cmd, params, callback) {
-	return this.call(cmd, 'DELETE', params, callback);
+api.post = function(cmd, params, callback, error) {
+	return this.call(cmd, 'POST', params, callback, error);
+}
+api.delete = function(cmd, params, callback, error) {
+	return this.call(cmd, 'DELETE', params, callback, error);
 }
 
-api.init = function(callback){
+api.init = function(history, callback){
+	this.history = history;
 	var request = new XMLHttpRequest();
 	request.open('GET', 'config.json', true);
 

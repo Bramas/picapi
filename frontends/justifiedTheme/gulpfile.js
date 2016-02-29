@@ -12,6 +12,7 @@ function compile(watch) {
   function rebundle() {
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
+      .on('log', function (msg) { console.error(msg); })
       .pipe(source('bundle.js'))
       .pipe(buffer())
       .pipe(sourcemaps.init({ loadMaps: true }))
@@ -23,7 +24,7 @@ function compile(watch) {
     bundler.on('update', function() {
       console.log('-> bundling...');
       rebundle();
-    });
+    }).on('log', function (msg) { console.error(msg); });
   }
 
   rebundle();

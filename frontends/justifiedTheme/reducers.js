@@ -1,6 +1,6 @@
 
 import { combineReducers } from 'redux'
-import { CREATE_ALBUM, UPLOAD_FINISHED, START_UPLOADS, ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
+import { RENAME_ALBUM, DELETE_ALBUM, CREATE_ALBUM, UPLOAD_FINISHED, START_UPLOADS, ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
 var Immutable = require('immutable');
 
 
@@ -33,7 +33,11 @@ function reducer(state, action) {
 		}
 		if(state.albums[action.destinationAlbumId] && state.albums[action.destinationAlbumId].photos)
 		{
-			state.albums[action.destinationAlbumId].photos.push(action.photoId);
+			if(state.albums[action.destinationAlbumId].photos.indexOf(action.photoId) == -1)
+			{
+				state.albums[action.destinationAlbumId].photos.push(action.photoId);
+			}
+			
 		}
 	    return state;
 	case REQUEST_ALBUMS:
@@ -51,6 +55,15 @@ function reducer(state, action) {
 			        state.uploadQueue.splice(i, 1);
 			    }
 			}
+   		return state;
+   	case DELETE_ALBUM:
+   	console.log(state.albums);
+   		delete state.albums[action.id];
+   	console.log(state.albums);
+   		return state;
+   	case RENAME_ALBUM:
+
+   		state.albums[action.id].title = action.title;
    		return state;
    	case CREATE_ALBUM:
    		state.albums[action.album.id] = action.album;
@@ -85,7 +98,7 @@ function reducer(state, action) {
 		state.lastUpdated = action.receivedAt;
 		
 		if(!state.albums[action.albumId]) {
-			state.albums[action.albumId] = {};
+			return state;
 		}
 		if(!state.albums[action.albumId].photos) {
 			state.albums[action.albumId].photos = [];

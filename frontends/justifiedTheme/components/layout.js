@@ -8,6 +8,9 @@ import UploadQueue from './upload-queue'
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
+import Paper from 'material-ui/lib/paper';
+
+
 class Layout extends React.Component {
     constructor(props) {
         super(props);
@@ -17,10 +20,18 @@ class Layout extends React.Component {
     render() {
         return <div>
         	<Header />
-            <div className="container">
-                <div className="col-md-3"><ListAlbums  /></div>
-                <div className="col-md-9">{this.props.children}</div>
-                <UploadQueue />
+            <div style={{'margin-top': '50px'}} className="container">
+                <div className="col-md-3">
+                    <Paper zDepth={3} rounded={true} >
+                        <ListAlbums />
+                    </Paper>
+                </div>
+                <div className="col-md-9">
+                    <Paper zDepth={3} rounded={true} >
+                        {this.props.children}
+                        <UploadQueue />
+                    </Paper>
+                </div>
             </div>
 	    </div>;
     }

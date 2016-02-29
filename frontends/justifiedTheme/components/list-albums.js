@@ -4,15 +4,32 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 import { Link } from 'react-router'
 import api from '../api';
+import { renameAlbum } from '../actions';
 import { connect } from 'react-redux'
 
 import { DropTarget } from 'react-dnd';
 import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 
-import { albumMovePhoto, fetchAlbums, createAlbum } from '../actions';
+import { albumMovePhoto, fetchAlbums, createAlbum, deleteAlbum } from '../actions';
 var basicModal = require('basicmodal');
 
 import Context from './context';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
+
+import IconButton from 'material-ui/lib/icon-button';
+import MoreVertIcon from 'material-ui/lib/svg-icons/navigation/more-vert';
+import IconMenu from 'material-ui/lib/menus/icon-menu';
+import MenuItem from 'material-ui/lib/menus/menu-item';
+import AddIcon from 'material-ui/lib/svg-icons/content/add';
+import Avatar from 'material-ui/lib/avatar';
+import Dialog from 'material-ui/lib/dialog';
+import FlatButton from 'material-ui/lib/flat-button';
+import RaisedButton from 'material-ui/lib/raised-button';
+import TextField from 'material-ui/lib/text-field';
+
+import { browserHistory } from 'react-router'
+
 
 const linkTarget = {
   canDrop(props) {
@@ -45,14 +62,13 @@ function collect(connect, monitor) {
 }
 
 const mapStateToProps = (state, props) => {
-  var title = props.title || 'Loading...'
-  if(state.albums[props.id] && state.albums[props.id].title)
+  if(!state.albums[props.id])
   {
-    title = state.albums[props.id].title
+    return {
+      title:'unkown'
+    }
   }
-  return {
-    title: title
-  }
+  return state.albums[props.id]
 }
 
 const mapDispatchToProps = (dispatch, props) => {
@@ -63,6 +79,95 @@ const mapDispatchToProps = (dispatch, props) => {
   }
 }
 
+import styles from 'material-ui/lib/styles';
+const Colors = styles.Colors;
+
+const iconButtonElement = (
+  <IconButton
+    touch={true}
+  >
+    <MoreVertIcon color={Colors.grey400} />
+  </IconButton>
+);
+
+
+class DeleteAlbumDialog extends React.Component {
+    handleClose() {
+      this.props.onClose();
+    }
+    handleSubmit() {
+      
+      api.store.dispatch(deleteAlbum(this.props.id));
+      this.props.onClose();
+    }
+    render() {
+
+        const actions = [
+          <FlatButton
+            label="Cancel"
+            secondary={true}
+            onTouchTap={this.handleClose.bind(this)}
+          />,
+          <FlatButton
+            label="Delete"
+            primary={true}
+            keyboardFocused={true}
+            onTouchTap={this.handleSubmit.bind(this)}
+          />,
+        ];
+        return <Dialog
+          title="Delete Album"
+          actions={actions}
+          modal={false}
+          open={this.props.open}
+          onRequestClose={this.handleClose.bind(this)} >
+            Are you sure you want to delete this album?
+        </Dialog>;
+    }
+}
+
+class RenameAlbumDialog extends React.Component {
+    constructor(props) {
+        super(props);
+        this.displayName = 'RenameDialog';
+    }
+    handleClose() {
+      this.props.onClose();
+    }
+    handleSubmit() {
+      api.store.dispatch(renameAlbum(this.props.id, this.refs['title'].getValue()));
+      this.props.onClose();
+    }
+    render() {
+
+        const actions = [
+          <FlatButton
+            label="Cancel"
+            secondary={true}
+            onTouchTap={this.handleClose.bind(this)}
+          />,
+          <FlatButton
+            label="Submit"
+            primary={true}
+            keyboardFocused={true}
+            onTouchTap={this.handleSubmit.bind(this)}
+          />,
+        ];
+        return <Dialog
+          title="Rename Album"
+          actions={actions}
+          modal={false}
+          open={this.props.open}
+          onRequestClose={this.handleClose.bind(this)} >
+            <TextField ref="title"
+              hintText="Album Name"
+              defaultValue={this.props.title}
+              floatingLabelText="Album Name"
+            />
+        </Dialog>;
+    }
+}
+
 
 let AlbumLink = React.createClass({
 
@@ -71,13 +176,50 @@ let AlbumLink = React.createClass({
         { },
         { title: 'Delete', icon: 'ion-person', fn: c => console.log(c)  },
   ],
+  getInitialState() {
+      return {
+        renaming:false,
+        deleting: false
+      }
+  },
+
+  rename() {
+       this.setState({renaming:true});
+  },
+  delete() {
+       this.setState({deleting:true});
+  },
   render() {
     var connectDropTarget = this.props.connectDropTarget;
-    var a = this.props.isOver ? '+': '';
+    let secondaryText = null;
+    if(this.props.photos) {
+      secondaryText = this.props.photos.length + ' photos';
+    }
+    let style = null
+    if(this.props.isOver) 
+    {
+      style = {backgroundColor: Colors.green400};
+    }
+    let rightIconMenu = (
+      <IconMenu iconButtonElement={iconButtonElement}>
+        <MenuItem onTouchTap={this.rename} >Rename</MenuItem>
+        <MenuItem onTouchTap={this.delete} >Delete</MenuItem>
+      </IconMenu>
+    );
       return connectDropTarget(<div>
         <Context items={this.contextMenu}>
-          <div><Link to={this.props.to}>{this.props.title}</Link>{a}</div>
-        </Context>
+          <div>
+            <ListItem 
+              style={style}
+              rightIconButton={ this.props.id === parseInt(this.props.id, 10) ? rightIconMenu : null}
+              onTouchTap={() =>  api.history.push(this.props.to)} 
+              secondaryText={secondaryText} 
+              primaryText={this.props.title} />
+          </div>
+        </Context><div>{ this.props.id === parseInt(this.props.id, 10) ? (<div>
+            <RenameAlbumDialog title={this.props.title} id={this.props.id} open={this.state.renaming} onClose={() => this.setState({renaming:false})} />
+            <DeleteAlbumDialog title={this.props.title} id={this.props.id} open={this.state.deleting} onClose={() => this.setState({deleting:false})} />
+          </div>):'' }</div>
       </div>);
   }
 });
@@ -95,13 +237,7 @@ AlbumLink = connect(
 
 let ListAlbumsView = React.createClass({
 	renderAlbum: function(albumId) {
-    let album = this.props.albums[albumId];
-    let badge = album.photos ? <span className="badge">{album.photos.length}</span> : '';
-
-		return <li key={album.id} className="list-album-entry list-group-item" title={album.title}>
-          {badge}
-					  <AlbumLink id={album.id} to={'/album/'+album.id} title={album.title} />
-          </li>
+		return <AlbumLink key={albumId} id={albumId} to={'/album/'+albumId} />
 	},
 
 	componentDidUpdate: function() {
@@ -139,7 +275,9 @@ let ListAlbumsView = React.createClass({
       return <div>Loading...</div>
     }
 		return <div>
-      <ul className="list-group">{Object.keys(this.props.albums).map(this.renderAlbum)}</ul>
+      <List>
+        {Object.keys(this.props.albums).map(this.renderAlbum)}
+      </List>
       <div onClick={this.newAlbum}>Nouvel Album</div>
     </div>;
 	}

@@ -12,17 +12,20 @@ api.post('Album::getAll', {}, function(data) {
 	ReactDom.render(<Albums albums={data.albums} />, document.getElementById('main-container'))
 });*/
 
-import { Router, Route, IndexRoute, Link } from 'react-router'
+import { Router, Route, IndexRoute, Link  } from 'react-router'
 import { Provider } from 'react-redux'
+
+import createHashHistory from 'history/lib/createHashHistory';
+const history = createHashHistory()
 
 let photos = []
 let timeline = {}
 
-api.init(function(){
+api.init(history, function(){
 
 ReactDom.render((
 	<Provider store={api.store}>
-		<Router>
+		<Router history={history}>
 			<Route path="/" component={Layout}>
 				<IndexRoute component={Albums}/>
 				<Route path="/timeline" component={Timeline}/>

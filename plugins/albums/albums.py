@@ -56,6 +56,7 @@ class Album():
 			INNER JOIN photos             ON r.photo_id = photos.id
 			WHERE albums.id=:id""", {'id':id}).fetchall()
 		db.close()
+
 		return success([photos.preparePhoto(dict(a)) for a in cur])
 
 	def photosAlbums(self, id):
@@ -67,6 +68,38 @@ class Album():
 		db.close()
 		return success([dict(a) for a in cur])
 
+	def update(self, id):
+		query = ''
+
+		value = {'id': id}
+
+		acceptedFields = ['title']
+
+		for i in acceptedFields:
+			if i in request.params: 
+				value[i] = request.params[i]
+				query += "SET "+i+" = :"+i
+		if len(query) == 0:
+			return error('no data sent (accepted fields: '+(','.join(acceptedFields))+')')
+
+		db = database.connect()
+		query = "UPDATE albums "+query+" WHERE id = :id"
+
+		cur = db.execute(query, value)
+		db.commit()
+		db.close()
+		return success()
+	def delete(self, id):
+		query = ''
+
+		value = {'id': id}
+
+		db = database.connect()
+		db.execute("DELETE FROM albums_photos WHERE album_id = :id", value)
+		db.execute("DELETE FROM albums WHERE id = :id", value)
+		db.commit()
+		db.close()
+		return success()
 	def add(self, title):
 		created_on = int(time.time())
 		value = {
@@ -93,11 +126,18 @@ class Album():
 
 	def add_photo(self, album_id, photo_id):
 		db = database.connect()
-		cur = db.execute("INSERT INTO albums_photos (album_id, photo_id) VALUES (:album_id, :photo_id)", 
+
+		cur = db.execute("SELECT * FROM albums_photos WHERE album_id=:album_id AND photo_id = :photo_id", 
 			{
 				'album_id': album_id,
 				'photo_id': photo_id
-			})
+			}).fetchone()
+		if not cur:
+			cur = db.execute("INSERT INTO albums_photos (album_id, photo_id) VALUES (:album_id, :photo_id)", 
+				{
+					'album_id': album_id,
+					'photo_id': photo_id
+				})
 		db.commit()
 		db.close()
 		return success()
@@ -112,6 +152,16 @@ def albums():
 def albumsById(id):
 
 	return Album().get(id)
+
+@app.route('/albums/<id:int>', method = 'PUT')
+def updateAlbum(id):
+
+	return Album().update(id)
+
+@app.route('/albums/<id:int>', method = 'DELETE')
+def deleteAlbum(id):
+
+	return Album().delete(id)
 
 @app.route('/albums/<id:int>/photos')
 def albumsById(id):
@@ -147,7 +197,8 @@ def albumsPhotosDelete(id, photo_id):
 @app.route('/albums/<id:re:unsorted>/photos', method='POST')
 @app.route('/albums/<id>/photos/<pid:int>', method='OPTIONS')
 @app.route('/albums/<id>/photos', method='OPTIONS')
+@app.route('/albums/<id>', method='OPTIONS')
 def albumsPhotosOptions(id, pid=None):
-	response.set_header('Access-Control-Allow-Methods', 'GET, POST, DELETE')
+	response.set_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
 	return success()
 

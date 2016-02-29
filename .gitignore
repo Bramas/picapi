@@ -1,2 +1,7 @@
 frontends/justifiedTheme/node_modules/
 frontends/src/
+picapi/__pycache__/
+plugins/albums/__pycache__/
+plugins/info/__pycache__/
+plugins/links/__pycache__/
+plugins/raw_files/__pycache__/
