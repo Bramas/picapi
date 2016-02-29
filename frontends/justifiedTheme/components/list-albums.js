@@ -29,7 +29,10 @@ import RaisedButton from 'material-ui/lib/raised-button';
 import TextField from 'material-ui/lib/text-field';
 
 import { browserHistory } from 'react-router'
+import FloatingActionButton from 'material-ui/lib/floating-action-button';
+import ContentAdd from 'material-ui/lib/svg-icons/content/add';
 
+import Paper from 'material-ui/lib/paper';
 
 const linkTarget = {
   canDrop(props) {
@@ -193,7 +196,7 @@ let AlbumLink = React.createClass({
     var connectDropTarget = this.props.connectDropTarget;
     let secondaryText = null;
     if(this.props.photos) {
-      secondaryText = this.props.photos.length + ' photos';
+      //secondaryText = this.props.photos.length + ' photos';
     }
     let style = null
     if(this.props.isOver) 
@@ -275,10 +278,16 @@ let ListAlbumsView = React.createClass({
       return <div>Loading...</div>
     }
 		return <div>
-      <List>
-        {Object.keys(this.props.albums).map(this.renderAlbum)}
-      </List>
-      <div onClick={this.newAlbum}>Nouvel Album</div>
+      <Paper zDepth={1}>
+        <List>
+          {Object.keys(this.props.albums).map(this.renderAlbum)}
+        </List>
+        <div style={{height:'28px', textAlign:'center'}}>
+          <FloatingActionButton onTouchTap={this.newAlbum}>
+            <ContentAdd />
+          </FloatingActionButton>
+        </div>
+      </Paper>
     </div>;
 	}
 });

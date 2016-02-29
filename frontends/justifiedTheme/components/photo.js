@@ -7,6 +7,21 @@ import { connect } from 'react-redux'
 import { Link } from 'react-router'
 import api from '../api';
 
+import CardHeader from 'material-ui/lib/card/card-header';
+import CardTitle from 'material-ui/lib/card/card-title';
+import CardMedia from 'material-ui/lib/card/card-media';
+import Card from 'material-ui/lib/card/card';
+import IconButton from 'material-ui/lib/icon-button';
+import MoreVertIcon from 'material-ui/lib/svg-icons/navigation/more-vert';
+import Paper from 'material-ui/lib/paper';
+
+import IconMenu from 'material-ui/lib/menus/icon-menu';
+import MenuItem from 'material-ui/lib/menus/menu-item';
+import AddIcon from 'material-ui/lib/svg-icons/content/add';
+
+
+import styles from 'material-ui/lib/styles';
+const Colors = styles.Colors;
 
 const photoSource = {
   beginDrag(props, monitor, component) {
@@ -19,6 +34,15 @@ const photoSource = {
   	}
   }
 };
+
+const iconButtonElement = (
+  <IconButton
+    touch={true}
+  >
+    <MoreVertIcon color={Colors.white} />
+  </IconButton>
+);
+
 
 function collect(connect, monitor) {
   return {
@@ -33,10 +57,25 @@ let Photo = DragSource('photo', photoSource, collect)(React.createClass({
   },
 	render: function() {
 		const { connectDragSource} = this.props;
-		return  connectDragSource(<div className="photo">
-					<img src={this.props.src}  title={this.props.title}/><span>{this.props.title}</span>
-          <div>{Object.keys(this.props.photo.attachments).map(this.renderAttachements)}</div>
-				</div>);
+    //overlay={<CardTitle titleStyle={{fontSize:'14px'}} title={this.props.title} />}
+		return  connectDragSource(
+        <div class="photo" style={{width:'100px'}}>
+          <Paper  zDepth={1}>
+            <Card>
+              <CardMedia>
+                <img src={this.props.src} />
+
+                <div style={{position:'absolute', top:'0', right:'0', width:'auto', 'min-width':'auto',display:'inline-block'}}>
+                  <IconMenu iconButtonElement={iconButtonElement}>
+                    <MenuItem onTouchTap={this.rename} >Rename</MenuItem>
+                    <MenuItem onTouchTap={this.delete} >Delete</MenuItem>
+                  </IconMenu>
+                </div>
+              </CardMedia>
+              <div>{Object.keys(this.props.photo.attachments).map(this.renderAttachements)}</div>
+            </Card>
+          </Paper>
+        </div>);
 	}
 }));
 

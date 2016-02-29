@@ -10,6 +10,9 @@ import HTML5Backend from 'react-dnd-html5-backend';
 
 import Paper from 'material-ui/lib/paper';
 
+import styles from 'material-ui/lib/styles';
+const Colors = styles.Colors;
+
 
 class Layout extends React.Component {
     constructor(props) {
@@ -18,19 +21,15 @@ class Layout extends React.Component {
     }
     
     render() {
-        return <div>
+        return <div style={{backgroundColor:Colors.grey100}}>
         	<Header />
             <div style={{'margin-top': '50px'}} className="container">
                 <div className="col-md-3">
-                    <Paper zDepth={3} rounded={true} >
-                        <ListAlbums />
-                    </Paper>
+                    <ListAlbums />
                 </div>
                 <div className="col-md-9">
-                    <Paper zDepth={3} rounded={true} >
-                        {this.props.children}
-                        <UploadQueue />
-                    </Paper>
+                    {this.props.children}
+                    <UploadQueue />
                 </div>
             </div>
 	    </div>;
