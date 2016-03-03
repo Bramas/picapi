@@ -23,4 +23,4 @@ def init(host='localhost', port=5000):
 	if os.environ.get('BASE_URL'):
 		Config.BaseUrl = os.environ.get('BASE_URL')
 	else:
-		Config.BaseUrl = '//'+host+':'+port
+		Config.BaseUrl = '//'+host+':'+str(port)

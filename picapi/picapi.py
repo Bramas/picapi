@@ -8,6 +8,8 @@ import bottle
 from . import app
 app.init()
 
+from . import startup
+
 import os
 from . import plugins, config
 config.init(host=os.environ.get('HOST', 'localhost'), port=os.environ.get('PORT', 8080))
