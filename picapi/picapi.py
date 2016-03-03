@@ -8,7 +8,9 @@ import bottle
 from . import app
 app.init()
 
+import os
 from . import plugins, config
+config.init(host=os.environ.get('HOST', 'localhost'), port=os.environ.get('PORT', 8080))
 plugins.init()
 
 from . import storages
@@ -16,6 +18,5 @@ storages.init()
 
 from . import photos
 
-import os
 def run():
-	bottle.run(app=app.app, host=os.environ.get('HOST', 'localhost'), port=os.environ.get('PORT', 8080), debug=True, server='gevent')
+	bottle.run(app=app.app, host=config.Config.Host, port=config.Config.Port, debug=True, server='gevent')
