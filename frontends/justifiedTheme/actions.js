@@ -2,6 +2,15 @@
 
 
 
+export const SELECT_PHOTO = 'SELECT_PHOTO';
+export function selectPhoto(id) {
+  return {
+      type: SELECT_PHOTO,
+      id: id
+    } 
+}
+
+
 export const RENAME_ALBUM = 'RENAME_ALBUM'
 export function renameAlbum(id, title) {
   var api = require('./api');
@@ -66,7 +75,7 @@ export function startUploads(files, albumId) {
 }
 
 export const ADD_ATTACHMENTS = 'ADD_ATTACHMENTS'
-export function addAttachements(id, attachments) {
+export function addAttachments(id, attachments) {
   return {
     type: ADD_ATTACHMENTS,
     id,

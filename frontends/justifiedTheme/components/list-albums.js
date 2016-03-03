@@ -13,7 +13,6 @@ import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 import { albumMovePhoto, fetchAlbums, createAlbum, deleteAlbum } from '../actions';
 var basicModal = require('basicmodal');
 
-import Context from './context';
 import List from 'material-ui/lib/lists/list';
 import ListItem from 'material-ui/lib/lists/list-item';
 
@@ -174,11 +173,6 @@ class RenameAlbumDialog extends React.Component {
 
 let AlbumLink = React.createClass({
 
-  contextMenu:  [
-        { title: 'Rename', icon: 'ion-plus-round', fn: c => console.log(c) },
-        { },
-        { title: 'Delete', icon: 'ion-person', fn: c => console.log(c)  },
-  ],
   getInitialState() {
       return {
         renaming:false,
@@ -210,7 +204,6 @@ let AlbumLink = React.createClass({
       </IconMenu>
     );
       return connectDropTarget(<div>
-        <Context items={this.contextMenu}>
           <div>
             <ListItem 
               style={style}
@@ -219,7 +212,7 @@ let AlbumLink = React.createClass({
               secondaryText={secondaryText} 
               primaryText={this.props.title} />
           </div>
-        </Context><div>{ this.props.id === parseInt(this.props.id, 10) ? (<div>
+        <div>{ this.props.id === parseInt(this.props.id, 10) ? (<div>
             <RenameAlbumDialog title={this.props.title} id={this.props.id} open={this.state.renaming} onClose={() => this.setState({renaming:false})} />
             <DeleteAlbumDialog title={this.props.title} id={this.props.id} open={this.state.deleting} onClose={() => this.setState({deleting:false})} />
           </div>):'' }</div>

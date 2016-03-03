@@ -24,10 +24,33 @@ let api = {
 }
 
 
-api.thumbUrl = function(photo) {
+api.thumbUrl = function(photo, size) {
+    if(size == undefined) 
+        size = '500';
+    let sizeToPrefix = {
+        '500':'',
+        '150':'_q',
+        '240':'_m'
+    };
+    let prefix = sizeToPrefix[size+''];
+    /*
+
+s   small square 75x75
+q   large square 150x150
+t   thumbnail, 100 on longest side
+m   small, 240 on longest side
+n   small, 320 on longest side
+-   medium, 500 on longest side
+z   medium 640, 640 on longest side
+c   medium 800, 800 on longest side†
+b   large, 1024 on longest side*
+h   large 1600, 1600 on longest side†
+k   large 2048, 2048 on longest side†
+
+    */
 	if(photo && photo['url_info'])
-		return photo['url_info']['base'] + photo['url_info']['extension'];
-	return 'http://placehold.it/300x200';
+		return photo['url_info']['base'] + prefix + photo['url_info']['extension'];
+	return 'http://placehold.it/'+size+'x'+size;
 }
 api.call = function(cmd, method, params, callback, error) {
 

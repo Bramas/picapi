@@ -19,6 +19,7 @@ import IconMenu from 'material-ui/lib/menus/icon-menu';
 import MenuItem from 'material-ui/lib/menus/menu-item';
 import AddIcon from 'material-ui/lib/svg-icons/content/add';
 
+import { selectPhoto } from '../actions';
 
 import styles from 'material-ui/lib/styles';
 const Colors = styles.Colors;
@@ -52,18 +53,24 @@ function collect(connect, monitor) {
   };
 }
 let Photo = DragSource('photo', photoSource, collect)(React.createClass({
-  renderAttachements: function(k) {
-    return <div key={k}><a href={this.props.photo.attachments[k]} >{k}</a></div>
-  },
 	render: function() {
 		const { connectDragSource} = this.props;
     //overlay={<CardTitle titleStyle={{fontSize:'14px'}} title={this.props.title} />}
+
+    let style = {margin:'10px', display:'inline-block', height:'100px', width:'100px'};
+    if(this.props.selected) {
+      style['border'] = '5px solid '+Colors.pinkA200;
+      style['height'] = '110px';
+      style['width']  = '110px';
+      style['margin']  = '5px';
+
+    }
 		return  connectDragSource(
-        <div class="photo" style={{width:'100px'}}>
-          <Paper  zDepth={1}>
-            <Card>
+        <div class="photo" style={style}>
+          <Paper zDepth={1}>
+            <Card onTouchTap={() => api.store.dispatch(selectPhoto(this.props.id))}>
               <CardMedia>
-                <img src={this.props.src} />
+                <img style={{height:'100px', width:'100px'}} src={this.props.src} />
 
                 <div style={{position:'absolute', top:'0', right:'0', width:'auto', 'min-width':'auto',display:'inline-block'}}>
                   <IconMenu iconButtonElement={iconButtonElement}>
@@ -72,7 +79,6 @@ let Photo = DragSource('photo', photoSource, collect)(React.createClass({
                   </IconMenu>
                 </div>
               </CardMedia>
-              <div>{Object.keys(this.props.photo.attachments).map(this.renderAttachements)}</div>
             </Card>
           </Paper>
         </div>);
@@ -93,8 +99,9 @@ const mapStateToProps = (state, props) => {
   }
   return {
       title: state.photos[props.id].title,
-      src  : api.thumbUrl(state.photos[props.id]),
-      photo: state.photos[props.id]
+      src  : api.thumbUrl(state.photos[props.id], 150),
+      photo: state.photos[props.id],
+      selected: state.selection.indexOf(props.id) != -1
     }
 }
 

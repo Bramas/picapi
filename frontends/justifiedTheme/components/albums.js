@@ -21,6 +21,10 @@ import CardMedia from 'material-ui/lib/card/card-media';
 import Card from 'material-ui/lib/card/card';
 import IconButton from 'material-ui/lib/icon-button';
 import MoreVertIcon from 'material-ui/lib/svg-icons/navigation/more-vert';
+import Paper from 'material-ui/lib/paper';
+import IconMenu from 'material-ui/lib/menus/icon-menu';
+import MenuItem from 'material-ui/lib/menus/menu-item';
+import AddIcon from 'material-ui/lib/svg-icons/content/add';
 
 const linkTarget = {
   canDrop(props) {
@@ -71,36 +75,48 @@ const mapDispatchToProps = (dispatch, props) => {
   }
 }
 
+import styles from 'material-ui/lib/styles';
+const Colors = styles.Colors;
+const iconButtonElement = (
+  <IconButton
+     onTouchTap={(event) => { console.log(event); }}
+    touch={true}
+  >
+    <MoreVertIcon color={Colors.white} />
+  </IconButton>
+);
+
 
 let AlbumLink = React.createClass({
 
-  contextMenu:  [
-        { title: 'Rename', icon: 'ion-plus-round', fn: c => console.log(c) },
-        { },
-        { title: 'Delete', icon: 'ion-person', fn: c => console.log(c)  },
-  ],
+  _handleRightIconButtonTouchTap(event) {
+    console.log('STOP PROPAG');
+    //Stop the event from bubbling up to the list-item
+    event.stopPropagation();
+    //if (iconButton && iconButton.props.onTouchTap) iconButton.props.onTouchTap(event);
+  },
   render() {
+    let style = {margin:'10px', display:'inline-block', height:'240px', width:'240px'};
+    
     var connectDropTarget = this.props.connectDropTarget;
     var a = this.props.isOver ? '+': '';
       return connectDropTarget(
-        <span>
-          <Context items={this.contextMenu}>
-            <Link to={this.props.to}>
-              <Card>
-                {false?<CardHeader
-                  title={this.props.title+a}
-                  subtitle={this.props.title+a}
-                  avatar="http://lorempixel.com/100/100/nature/" />:''}
-                <CardMedia
-                  overlay={<CardTitle title="Overlay title" subtitle="Overlay subtitle" />}
-                >
-                  <img src={this.props.img} />
-                </CardMedia>
-                {false?<CardTitle title="Card title" subtitle="Card subtitle" />:''}
-              </Card>
-            </Link>
-          </Context>
-        </span>);
+        <div class="photo" style={style}>
+          <Paper zDepth={1}>
+            <Card onTouchTap={() => api.history.push(this.props.to)}>
+              <CardMedia overlay={<CardTitle title={this.props.title+a} />} >
+                <img style={{height:'240px', width:'240px'}} src={api.thumbUrl(this.props.cover, 240)} />
+
+                <div style={{position:'absolute', top:'0', right:'0', width:'auto', 'min-width':'auto',display:'inline-block'}}>
+                  <IconMenu onTouchTap={this._handleRightIconButtonTouchTap} iconButtonElement={iconButtonElement}>
+                    <MenuItem onTouchTap={this.rename} >Rename</MenuItem>
+                    <MenuItem onTouchTap={this.delete} >Delete</MenuItem>
+                  </IconMenu>
+                </div>
+              </CardMedia>
+            </Card>
+          </Paper>
+        </div>);
   }
 });
 

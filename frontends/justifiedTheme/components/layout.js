@@ -4,7 +4,7 @@ import LeftPane from './left-pane';
 import Header from './header';
 import ListAlbums from './list-albums';
 import UploadQueue from './upload-queue'
-
+import InfoPanel from './info-panel';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
@@ -23,13 +23,18 @@ class Layout extends React.Component {
     render() {
         return <div style={{backgroundColor:Colors.grey100}}>
         	<Header />
-            <div style={{'margin-top': '50px'}} className="container">
-                <div className="col-md-3">
+            <div className="container-fluid">
+                <div className="col-md-2">
                     <ListAlbums />
                 </div>
-                <div className="col-md-9">
+                <div className="col-md-7">
                     {this.props.children}
                     <UploadQueue />
+                </div>
+                <div className="col-md-3">
+                    <Paper>
+                        <InfoPanel />
+                    </Paper>
                 </div>
             </div>
 	    </div>;
