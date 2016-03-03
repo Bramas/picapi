@@ -1,9 +1,8 @@
 from bottle import request, response
-import bottle.ext.sqlite
 import os, json
 from os.path import isfile, isdir, join
 
-from . import config
+from . import config, log
 
 app = None
 
@@ -20,9 +19,9 @@ def success(data=None):
 def init():
 	global app
 	app = bottle.Bottle()  
-	app.config.load_config(join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) , 'data', 'picapi.conf'))
-
-	print('load sqlite db ', app.config['sqlite.db'])
+	configFile = join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) , 'data', 'picapi.conf')
+	log.info('use config '+configFile)
+	app.config.load_config(configFile)
 
 
 

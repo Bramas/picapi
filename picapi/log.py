@@ -1,3 +1,6 @@
 
+import sys
 def info(msg):
-	print(str(msg))
+	#sys.stdout.write(str(msg))
+	#sys.stdout.flush()
+	return

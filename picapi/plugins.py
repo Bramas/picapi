@@ -87,5 +87,5 @@ def init():
 			plugin = join(config.Path.Plugins, f, f)
 			if isfile(plugin+'.py'):
 				plugin = f + '.' + f
-				print(plugin)
+				log.info('load plugin: '+plugin)
 				__import__(plugin)
