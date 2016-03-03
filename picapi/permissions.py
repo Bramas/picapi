@@ -45,12 +45,12 @@ add_hook('on_body_sent', delete_user)
 import httplib2
 from oauth2client import client
 from apiclient import discovery
-import sys
+import os
 
-if sys.environ.get('GOOGLE_OAUTH2_client_id'):
+if os.environ.get('GOOGLE_OAUTH2_client_id'):
 	from oauth2client.client import OAuth2WebServerFlow
-	flow = OAuth2WebServerFlow(client_id= sys.environ.get('GOOGLE_OAUTH2_client_id'),
-                           client_secret= sys.environ.get('GOOGLE_OAUTH2_client_secret'),
+	flow = OAuth2WebServerFlow(client_id= os.environ.get('GOOGLE_OAUTH2_client_id'),
+                           client_secret= os.environ.get('GOOGLE_OAUTH2_client_secret'),
                            scope='https://www.googleapis.com/auth/userinfo.email',
                            redirect_uri='http://localhost:8080/oauth2callback')
 else:
