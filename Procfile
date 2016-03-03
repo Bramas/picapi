@@ -1,1 +1,1 @@
-web: picapi.py
+web: python picapi.py
