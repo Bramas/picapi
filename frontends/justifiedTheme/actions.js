@@ -1,6 +1,32 @@
 
 
 
+
+export const SELECT_PHOTO = 'SELECT_PHOTO';
+export function selectPhoto(id) {
+  return {
+      type: SELECT_PHOTO,
+      id: id
+    } 
+}
+
+
+export const RENAME_ALBUM = 'RENAME_ALBUM'
+export function renameAlbum(id, title) {
+  var api = require('./api');
+  return dispatch => {
+    api.put('/albums/'+id, {title: title}, function(data) { 
+      dispatch({
+        type: RENAME_ALBUM,
+        id: id,
+        title: title
+      })
+    });
+  } 
+}
+
+
+
 export const ALBUM_MOVE_PHOTO = 'ALBUM_MOVE_PHOTO';
 export function albumMovePhoto(originAlbumId, destinationAlbumId, photoId) {
   var api = require('./api');
@@ -49,7 +75,7 @@ export function startUploads(files, albumId) {
 }
 
 export const ADD_ATTACHMENTS = 'ADD_ATTACHMENTS'
-export function addAttachements(id, attachments) {
+export function addAttachments(id, attachments) {
   return {
     type: ADD_ATTACHMENTS,
     id,
@@ -117,6 +143,21 @@ export function fetchAlbumPhotos(albumId) {
 		dispatch(requestAlbumPhotos(albumId))
 		api.get('/albums/'+albumId+'/photos', {}, function(data){
 			dispatch(receiveAlbumPhotos(albumId, data))
-		});
+		}, function() { api.history.push('/'); });
 	}
 };
+
+
+export const DELETE_ALBUM = 'DELETE_ALBUM'
+export function deleteAlbum(id) {
+  var api = require('./api');
+  return dispatch => {
+    api.delete('/albums/'+id, {}, function(data) { 
+      dispatch({
+        type: DELETE_ALBUM,
+        id: id
+      })
+      dispatch(fetchAlbumPhotos('unsorted'));
+    });
+  } 
+}

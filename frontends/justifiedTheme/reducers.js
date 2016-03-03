@@ -1,15 +1,19 @@
 
 import { combineReducers } from 'redux'
-import { CREATE_ALBUM, UPLOAD_FINISHED, START_UPLOADS, ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
+import { SELECT_PHOTO, RENAME_ALBUM, DELETE_ALBUM, CREATE_ALBUM, UPLOAD_FINISHED, START_UPLOADS, ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
 var Immutable = require('immutable');
 
+var React = require('react');
+import PhotoInfo from './components/photo-info';
 
 const initialState = {
   albums: false,
   photos: {},
   lastUpdated: Date.now(),
   isFetching: false,
-  uploadQueue: []
+  uploadQueue: [],
+  selectionInfo: <PhotoInfo selection={[32]} />,
+  selection: [32]
 }
 
 function reducer(state, action) {
@@ -33,7 +37,11 @@ function reducer(state, action) {
 		}
 		if(state.albums[action.destinationAlbumId] && state.albums[action.destinationAlbumId].photos)
 		{
-			state.albums[action.destinationAlbumId].photos.push(action.photoId);
+			if(state.albums[action.destinationAlbumId].photos.indexOf(action.photoId) == -1)
+			{
+				state.albums[action.destinationAlbumId].photos.push(action.photoId);
+			}
+			
 		}
 	    return state;
 	case REQUEST_ALBUMS:
@@ -52,11 +60,20 @@ function reducer(state, action) {
 			    }
 			}
    		return state;
+   	case DELETE_ALBUM:
+   	console.log(state.albums);
+   		delete state.albums[action.id];
+   	console.log(state.albums);
+   		return state;
+   	case RENAME_ALBUM:
+
+   		state.albums[action.id].title = action.title;
+   		return state;
    	case CREATE_ALBUM:
    		state.albums[action.album.id] = action.album;
    		return state;
 	case START_UPLOADS:
-		for (var i=0; i<action.files.length; i++) {
+		for (var i=0; i < action.files.length; i++) {
     	    state.uploadQueue.push({
     	    	name: action.files[i].name, 
     	    	size: action.files[i].size,
@@ -85,7 +102,7 @@ function reducer(state, action) {
 		state.lastUpdated = action.receivedAt;
 		
 		if(!state.albums[action.albumId]) {
-			state.albums[action.albumId] = {};
+			return state;
 		}
 		if(!state.albums[action.albumId].photos) {
 			state.albums[action.albumId].photos = [];
@@ -96,49 +113,22 @@ function reducer(state, action) {
 		}
 		
 	    return state;
+
+	case SELECT_PHOTO:
+		if(false) //TODO: if ControlModfier
+		{
+			if(state.selection.indexOf(action.id) == -1)
+				state.selection.push(action.id);
+		}
+		else {
+			state.selection = [action.id];
+		}
+
+		state.selectionInfo = <PhotoInfo selection={state.selection} />
+		return state
 	default:
 		return state; 
   }
-  /*
-  switch (action.type) {
-	case ALBUM_MOVE_PHOTO:
-		let p = false;
-		if(state.getIn(['albums', action.originAlbumId]) && state.getIn(['albums', action.originAlbumId, 'photos']))
-		{
-			state = state.updateIn(['albums', action.originAlbumId, 'photos'], function(photos) {
-				for(var i = photos.length - 1; i >= 0; i--) {
-				    if(photos[i].id === action.photoId) {
-				    	p = photos[i]
-				        photos.splice(i, 1);
-				    }
-				}
-			});
-			
-		}
-		if(state.getIn(['albums', action.destinationAlbumId]) && state.getIn(['albums', action.destinationAlbumId, 'photos']))
-		{
-			state = state.updateIn(['albums', action.originAlbumId, 'photos'], photos => photos.push(p));
-		}
-	    break;
-	case REQUEST_ALBUM_PHOTOS:
-	  state.set('isFetching', true);
-	  break;
-	case RECEIVE_ALBUM_PHOTOS:
-		state = state.set('isFetching', false)
-		state = state.set('lastUpdated', action.receivedAt);
-		
-		if(!state.getIn(['albums', action.albumId, 'photos'])) {
-			var a = {albums: {}}
-			a.albums[action.albumId] = { photos:[] };
-			state = state.mergeDeep(a);
-		}
-		
-		state = state.setIn(['albums', action.albumId, 'photos'], action.photos);
-	    break;
-	default:
-	    
-  }
-  return state.toJS();*/
 
 }
 

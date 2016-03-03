@@ -6,7 +6,7 @@ from os import listdir
 from os.path import isfile, isdir, join
 
 import PIL
-from PIL import Image
+from PIL import Image, ImageOps
 
 class LocalStorage():
 	"""
@@ -34,10 +34,46 @@ class LocalStorage():
 		else:
 			return False
 
-		filename = str(id) + '_' + secret + ext
+		basename = str(id) + '_' + secret
 		im = Image.open(join(config.Path.Uploads, o_filename))
-		im.thumbnail([100,100], Image.ANTIALIAS)
-		im.save(join(config.Path.CachePhotos, filename), "JPEG")
+		if max(im.size) > 2048:
+			im.thumbnail([2048,2048], Image.ANTIALIAS)
+			im.save(join(config.Path.CachePhotos, basename+'_k'+ext), "JPEG")
+
+		thumb = ImageOps.fit(im, [75,75], Image.ANTIALIAS)
+		thumb.save(join(config.Path.CachePhotos, str(id) + '_' + secret + '_s' + ext), "JPEG")
+		thumb = ImageOps.fit(im, [150,150], Image.ANTIALIAS)
+		thumb.save(join(config.Path.CachePhotos, str(id) + '_' + secret + '_q' + ext), "JPEG")
+		
+
+		im2 = im.copy()
+		im2.thumbnail([1600,1600], Image.ANTIALIAS)
+		im2.save(join(config.Path.CachePhotos, basename+'_h'+ext), "JPEG")
+
+		im = im.copy()
+		im.thumbnail([1024,1024], Image.ANTIALIAS)
+		im.save(join(config.Path.CachePhotos, basename+'_b'+ext), "JPEG")
+
+		im2 = im.copy()
+		im2.thumbnail([800,800], Image.ANTIALIAS)
+		im2.save(join(config.Path.CachePhotos, basename+'_c'+ext), "JPEG")
+
+		im2 = im.copy()
+		im2.thumbnail([640,640], Image.ANTIALIAS)
+		im2.save(join(config.Path.CachePhotos, basename+'_z'+ext), "JPEG")
+
+		im2 = im.copy()
+		im2.thumbnail([500,500], Image.ANTIALIAS)
+		im2.save(join(config.Path.CachePhotos, basename+ext), "JPEG")
+
+		im2 = im.copy()
+		im2.thumbnail([320,320], Image.ANTIALIAS)
+		im2.save(join(config.Path.CachePhotos, basename+'_n'+ext), "JPEG")
+
+		im2 = im.copy()
+		im2.thumbnail([240,240], Image.ANTIALIAS)
+		im2.save(join(config.Path.CachePhotos, basename+'_m'+ext), "JPEG")
+
 		return True
 
 	def delete(self, id, secret, o_secret, ext):
