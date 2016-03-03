@@ -47,12 +47,17 @@ from oauth2client import client
 from apiclient import discovery
 
 
-
-
-flow = client.flow_from_clientsecrets(
-	join(config.Path.Data, 'client_secrets.json'),
-	scope='https://www.googleapis.com/auth/userinfo.email',
-	redirect_uri='http://localhost:8080/oauth2callback')
+if sys.environ.get('GOOGLE_OAUTH2_client_id'):
+	from oauth2client.client import OAuth2WebServerFlow
+	flow = OAuth2WebServerFlow(client_id= sys.environ.get('GOOGLE_OAUTH2_client_id'),
+                           client_secret= sys.environ.get('GOOGLE_OAUTH2_client_secret'),
+                           scope='https://www.googleapis.com/auth/userinfo.email',
+                           redirect_uri='http://localhost:8080/oauth2callback')
+else:
+	flow = client.flow_from_clientsecrets(
+		join(config.Path.Data, 'client_secrets.json'),
+		scope='https://www.googleapis.com/auth/userinfo.email',
+		redirect_uri='http://localhost:8080/oauth2callback')
 
 class FakeProvider:
 
