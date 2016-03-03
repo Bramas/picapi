@@ -14,4 +14,4 @@ storages.init()
 from . import photos
 
 def run():
-	bottle.run(app=app.app, host='localhost', port=8080, debug=True, server='gevent')
+	bottle.run(app=app.app, host=os.environ.get('HOST', 'localhost'), port=os.environ.get('PORT', 8080), debug=True, server='gevent')
