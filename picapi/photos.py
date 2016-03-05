@@ -64,7 +64,7 @@ def update(id):
 
 	query = "UPDATE photos "+query+" WHERE id = :id"
 	cur = db.execute(query, value)
-	
+
 	db.commit()
 	db.close()
 	return success()
@@ -263,7 +263,7 @@ def route_delete(id):
 
 @app.route('/photos/<id>', method='OPTIONS')
 @app.route('/photos', method='OPTIONS')
-def route_options_upload():
+def route_options_upload(id=0):
 	response.set_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
 	return success()
 
