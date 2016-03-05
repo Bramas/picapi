@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 
 import { Link } from 'react-router'
 import api from '../api';
+import { DeletePhotoDialog, RenamePhotoDialog } from './dialogs';
 
 import CardHeader from 'material-ui/lib/card/card-header';
 import CardTitle from 'material-ui/lib/card/card-title';
@@ -53,6 +54,54 @@ function collect(connect, monitor) {
   };
 }
 let Photo = DragSource('photo', photoSource, collect)(React.createClass({
+  getInitialState() {
+      return {
+        renaming:false,
+        deleting: false
+      }
+  },
+  _handleRightIconButtonKeyboardFocus(event, isKeyboardFocused) {
+    //const iconButton = this.props.rightIconButton;
+    const newState = {};
+
+    newState.rightIconButtonKeyboardFocused = isKeyboardFocused;
+    if (isKeyboardFocused) newState.isKeyboardFocused = false;
+    this.setState(newState);
+
+    //if (iconButton && iconButton.props.onKeyboardFocus) iconButton.props.onKeyboardFocus(event, isKeyboardFocused);
+  },
+
+  _handleRightIconButtonMouseDown(event) {
+    //const iconButton = this.props.rightIconButton;
+    event.stopPropagation();
+    //if (iconButton && iconButton.props.onMouseDown) iconButton.props.onMouseDown(event);
+  },
+
+  _handleRightIconButtonMouseLeave(event) {
+    //const iconButton = this.props.rightIconButton;
+    this.setState({rightIconButtonHovered: false});
+    //if (iconButton && iconButton.props.onMouseLeave) iconButton.props.onMouseLeave(event);
+  },
+
+  _handleRightIconButtonMouseEnter(event) {
+    //const iconButton = this.props.rightIconButton;
+    this.setState({rightIconButtonHovered: true});
+    //if (iconButton && iconButton.props.onMouseEnter) iconButton.props.onMouseEnter(event);
+  },
+
+  _handleRightIconButtonMouseUp(event) {
+    //const iconButton = this.props.rightIconButton;
+    event.stopPropagation();
+    //if (iconButton && iconButton.props.onMouseUp) iconButton.props.onMouseUp(event);
+  },
+
+  _handleRightIconButtonTouchTap(event) {
+    //const iconButton = this.props.rightIconButton;
+
+    //Stop the event from bubbling up to the list-item
+    event.stopPropagation();
+    //if (iconButton && iconButton.props.onTouchTap) iconButton.props.onTouchTap(event);
+  },
 	render: function() {
 		const { connectDragSource} = this.props;
     //overlay={<CardTitle titleStyle={{fontSize:'14px'}} title={this.props.title} />}
@@ -65,22 +114,31 @@ let Photo = DragSource('photo', photoSource, collect)(React.createClass({
       style['margin']  = '5px';
 
     }
+    const rightIconButtonHandlers = {
+        onKeyboardFocus: this._handleRightIconButtonKeyboardFocus,
+        onMouseEnter: this._handleRightIconButtonMouseEnter,
+        onMouseLeave: this._handleRightIconButtonMouseLeave,
+        onTouchTap: this._handleRightIconButtonTouchTap,
+        onMouseDown: this._handleRightIconButtonMouseUp,
+        onMouseUp: this._handleRightIconButtonMouseUp,
+      };
 		return  connectDragSource(
-        <div class="photo" style={style}>
+        <div className="photo" style={style}>
           <Paper zDepth={1}>
-            <Card onTouchTap={() => api.store.dispatch(selectPhoto(this.props.id))}>
+            <Card style={{position:'relative'}} onTouchTap={() => api.store.dispatch(selectPhoto(this.props.id))}>
               <CardMedia>
                 <img style={{height:'100px', width:'100px'}} src={this.props.src} />
-
-                <div style={{position:'absolute', top:'0', right:'0', width:'auto', 'min-width':'auto',display:'inline-block'}}>
-                  <IconMenu iconButtonElement={iconButtonElement}>
-                    <MenuItem onTouchTap={this.rename} >Rename</MenuItem>
-                    <MenuItem onTouchTap={this.delete} >Delete</MenuItem>
-                  </IconMenu>
-                </div>
               </CardMedia>
+              <div style={{position:'absolute', top:'0', right:'0', width:'auto', 'minWidth':'auto',display:'inline-block'}}>
+                <IconMenu iconButtonElement={iconButtonElement}>
+                  <MenuItem onTouchTap={() => this.setState({renaming:true})} >Rename</MenuItem>
+                  <MenuItem onTouchTap={() => this.setState({deleting:true})} >Delete</MenuItem>
+                </IconMenu>
+              </div>
             </Card>
           </Paper>
+          <RenamePhotoDialog title={this.props.title} id={this.props.id} open={this.state.renaming} onClose={() => this.setState({renaming:false})} />
+          <DeletePhotoDialog title={this.props.title} id={this.props.id} open={this.state.deleting} onClose={() => this.setState({deleting:false})} />
         </div>);
 	}
 }));

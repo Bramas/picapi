@@ -11,6 +11,20 @@ export function selectPhoto(id) {
 }
 
 
+export const RENAME_PHOTO = 'RENAME_PHOTO'
+export function renamePhoto(id, title) {
+  var api = require('./api');
+  return dispatch => {
+    api.put('/photos/'+id, {title: title}, function(data) { 
+      dispatch({
+        type: RENAME_PHOTO,
+        id: id,
+        title: title
+      })
+    });
+  } 
+}
+
 export const RENAME_ALBUM = 'RENAME_ALBUM'
 export function renameAlbum(id, title) {
   var api = require('./api');
@@ -147,6 +161,20 @@ export function fetchAlbumPhotos(albumId) {
 	}
 };
 
+
+export const DELETE_PHOTO = 'DELETE_PHOTO'
+export function deletePhoto(id) {
+  var api = require('./api');
+  return dispatch => {
+    api.delete('/photos/'+id, {}, function(data) { 
+      dispatch({
+        type: DELETE_PHOTO,
+        id: id
+      })
+      dispatch(fetchAlbumPhotos('unsorted'));
+    });
+  } 
+}
 
 export const DELETE_ALBUM = 'DELETE_ALBUM'
 export function deleteAlbum(id) {

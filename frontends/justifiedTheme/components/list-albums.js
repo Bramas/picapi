@@ -11,6 +11,7 @@ import { DropTarget } from 'react-dnd';
 import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 
 import { albumMovePhoto, fetchAlbums, createAlbum, deleteAlbum } from '../actions';
+import { DeleteAlbumDialog, RenameAlbumDialog, CreateAlbumDialog } from './dialogs';
 var basicModal = require('basicmodal');
 
 import List from 'material-ui/lib/lists/list';
@@ -93,84 +94,6 @@ const iconButtonElement = (
 );
 
 
-class DeleteAlbumDialog extends React.Component {
-    handleClose() {
-      this.props.onClose();
-    }
-    handleSubmit() {
-      
-      api.store.dispatch(deleteAlbum(this.props.id));
-      this.props.onClose();
-    }
-    render() {
-
-        const actions = [
-          <FlatButton
-            label="Cancel"
-            secondary={true}
-            onTouchTap={this.handleClose.bind(this)}
-          />,
-          <FlatButton
-            label="Delete"
-            primary={true}
-            keyboardFocused={true}
-            onTouchTap={this.handleSubmit.bind(this)}
-          />,
-        ];
-        return <Dialog
-          title="Delete Album"
-          actions={actions}
-          modal={false}
-          open={this.props.open}
-          onRequestClose={this.handleClose.bind(this)} >
-            Are you sure you want to delete this album?
-        </Dialog>;
-    }
-}
-
-class RenameAlbumDialog extends React.Component {
-    constructor(props) {
-        super(props);
-        this.displayName = 'RenameDialog';
-    }
-    handleClose() {
-      this.props.onClose();
-    }
-    handleSubmit() {
-      api.store.dispatch(renameAlbum(this.props.id, this.refs['title'].getValue()));
-      this.props.onClose();
-    }
-    render() {
-
-        const actions = [
-          <FlatButton
-            label="Cancel"
-            secondary={true}
-            onTouchTap={this.handleClose.bind(this)}
-          />,
-          <FlatButton
-            label="Submit"
-            primary={true}
-            keyboardFocused={true}
-            onTouchTap={this.handleSubmit.bind(this)}
-          />,
-        ];
-        return <Dialog
-          title="Rename Album"
-          actions={actions}
-          modal={false}
-          open={this.props.open}
-          onRequestClose={this.handleClose.bind(this)} >
-            <TextField ref="title"
-              hintText="Album Name"
-              defaultValue={this.props.title}
-              floatingLabelText="Album Name"
-            />
-        </Dialog>;
-    }
-}
-
-
 let AlbumLink = React.createClass({
 
   getInitialState() {
@@ -215,7 +138,8 @@ let AlbumLink = React.createClass({
         <div>{ this.props.id === parseInt(this.props.id, 10) ? (<div>
             <RenameAlbumDialog title={this.props.title} id={this.props.id} open={this.state.renaming} onClose={() => this.setState({renaming:false})} />
             <DeleteAlbumDialog title={this.props.title} id={this.props.id} open={this.state.deleting} onClose={() => this.setState({deleting:false})} />
-          </div>):'' }</div>
+          </div>):'' }
+        </div>
       </div>);
   }
 });
@@ -232,6 +156,11 @@ AlbumLink = connect(
 
 
 let ListAlbumsView = React.createClass({
+  getInitialState() {
+      return {
+          createAlbumDialog:false  
+      };
+  },
 	renderAlbum: function(albumId) {
 		return <AlbumLink key={albumId} id={albumId} to={'/album/'+albumId} />
 	},
@@ -242,30 +171,6 @@ let ListAlbumsView = React.createClass({
 	componentDidMount: function() {
 		this.componentDidUpdate();
 	},
-  newAlbum: function() {
-        basicModal.show({
-        body: `
-              <p><strong>New Album</strong></p>
-              <input class="basicModal__text" type="text" placeholder="Album Title" name="title">
-              `,
-        class: basicModal.THEME.small,
-        closable: true,
-        buttons: {
-            cancel: {
-                class: basicModal.THEME.xclose,
-                fn: basicModal.close
-            },
-            action: {
-                title: 'Create Album',
-                fn: function(data) {
-                   this.props.createAlbum(data.title);
-                   basicModal.close();
-                }.bind(this)
-            }
-        }
-    });
-  },
-
 	render: function() {
     if(!this.props.albums) {
       return <div>Loading...</div>
@@ -276,11 +181,12 @@ let ListAlbumsView = React.createClass({
           {Object.keys(this.props.albums).map(this.renderAlbum)}
         </List>
         <div style={{height:'28px', textAlign:'center'}}>
-          <FloatingActionButton onTouchTap={this.newAlbum}>
+          <FloatingActionButton onTouchTap={() => this.setState({createAlbumDialog : true})}>
             <ContentAdd />
           </FloatingActionButton>
         </div>
       </Paper>
+      <CreateAlbumDialog open={this.state.createAlbumDialog}   onClose={() => this.setState({createAlbumDialog:false})} />
     </div>;
 	}
 });

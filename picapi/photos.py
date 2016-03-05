@@ -46,6 +46,28 @@ def preparePhoto(photo):
 
 	return data
 
+def update(id):
+
+	value = {'id': id}
+
+	acceptedFields = ['title']
+
+	for i in acceptedFields:
+		if i in request.params: 
+			value[i] = request.params[i]
+			query += "SET "+i+" = :"+i
+
+	if len(query) == 0:
+		return error('no data sent (accepted fields: '+(','.join(acceptedFields))+')')
+
+	db = database.connect()
+
+	query = "UPDATE photos "+query+" WHERE id = :id"
+	cur = db.execute(query, value)
+	
+	db.commit()
+	db.close()
+	return success()
 def get(id=None):
 	db = database.connect()
 	if id:
@@ -227,6 +249,9 @@ def route_photos():
 def route_photo(id):
 	return get(id)
 
+@app.route('/photos/<id>', method='PUT')
+def route_put_photo(id):
+	return update(id)
 
 @app.route('/photos/<id>', method='DELETE')
 def route_delete(id):
@@ -236,8 +261,10 @@ def route_delete(id):
 	return delete(id)
 
 
+@app.route('/photos/<id>', method='OPTIONS')
 @app.route('/photos', method='OPTIONS')
 def route_options_upload():
+	response.set_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
 	return success()
 
 

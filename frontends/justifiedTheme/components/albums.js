@@ -10,6 +10,7 @@ import { DropTarget } from 'react-dnd';
 import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 
 import { albumMovePhoto, fetchAlbums, createAlbum } from '../actions';
+import { DeleteAlbumDialog, RenameAlbumDialog, CreateAlbumDialog } from './dialogs';
 var basicModal = require('basicmodal');
 
 import Context from './context';
@@ -78,8 +79,7 @@ const mapDispatchToProps = (dispatch, props) => {
 import styles from 'material-ui/lib/styles';
 const Colors = styles.Colors;
 const iconButtonElement = (
-  <IconButton
-     onTouchTap={(event) => { console.log(event); }}
+  <IconButton onTouchTap={(event) => { console.log(event); }}
     touch={true}
   >
     <MoreVertIcon color={Colors.white} />
@@ -89,33 +89,91 @@ const iconButtonElement = (
 
 let AlbumLink = React.createClass({
 
+  getInitialState() {
+      return {
+        renaming:false,
+        deleting: false
+      }
+  },
+
+  _handleRightIconButtonKeyboardFocus(event, isKeyboardFocused) {
+    //const iconButton = this.props.rightIconButton;
+    const newState = {};
+
+    newState.rightIconButtonKeyboardFocused = isKeyboardFocused;
+    if (isKeyboardFocused) newState.isKeyboardFocused = false;
+    this.setState(newState);
+
+    //if (iconButton && iconButton.props.onKeyboardFocus) iconButton.props.onKeyboardFocus(event, isKeyboardFocused);
+  },
+
+  _handleRightIconButtonMouseDown(event) {
+    //const iconButton = this.props.rightIconButton;
+    event.stopPropagation();
+    //if (iconButton && iconButton.props.onMouseDown) iconButton.props.onMouseDown(event);
+  },
+
+  _handleRightIconButtonMouseLeave(event) {
+    //const iconButton = this.props.rightIconButton;
+    this.setState({rightIconButtonHovered: false});
+    //if (iconButton && iconButton.props.onMouseLeave) iconButton.props.onMouseLeave(event);
+  },
+
+  _handleRightIconButtonMouseEnter(event) {
+    //const iconButton = this.props.rightIconButton;
+    this.setState({rightIconButtonHovered: true});
+    //if (iconButton && iconButton.props.onMouseEnter) iconButton.props.onMouseEnter(event);
+  },
+
+  _handleRightIconButtonMouseUp(event) {
+    //const iconButton = this.props.rightIconButton;
+    event.stopPropagation();
+    //if (iconButton && iconButton.props.onMouseUp) iconButton.props.onMouseUp(event);
+  },
+
   _handleRightIconButtonTouchTap(event) {
-    console.log('STOP PROPAG');
+    //const iconButton = this.props.rightIconButton;
+
     //Stop the event from bubbling up to the list-item
     event.stopPropagation();
     //if (iconButton && iconButton.props.onTouchTap) iconButton.props.onTouchTap(event);
   },
+
   render() {
     let style = {margin:'10px', display:'inline-block', height:'240px', width:'240px'};
     
+    const rightIconButtonHandlers = {
+        onKeyboardFocus: this._handleRightIconButtonKeyboardFocus,
+        onMouseEnter: this._handleRightIconButtonMouseEnter,
+        onMouseLeave: this._handleRightIconButtonMouseLeave,
+        onTouchTap: this._handleRightIconButtonTouchTap,
+        onMouseDown: this._handleRightIconButtonMouseUp,
+        onMouseUp: this._handleRightIconButtonMouseUp,
+      };
+
     var connectDropTarget = this.props.connectDropTarget;
     var a = this.props.isOver ? '+': '';
       return connectDropTarget(
-        <div class="photo" style={style}>
+        <div className="album" style={style}>
           <Paper zDepth={1}>
-            <Card onTouchTap={() => api.history.push(this.props.to)}>
+            <Card style={{position:'relative'}}
+              onTouchTap={() => api.history.push(this.props.to)} >
               <CardMedia overlay={<CardTitle title={this.props.title+a} />} >
                 <img style={{height:'240px', width:'240px'}} src={api.thumbUrl(this.props.cover, 240)} />
-
-                <div style={{position:'absolute', top:'0', right:'0', width:'auto', 'min-width':'auto',display:'inline-block'}}>
-                  <IconMenu onTouchTap={this._handleRightIconButtonTouchTap} iconButtonElement={iconButtonElement}>
-                    <MenuItem onTouchTap={this.rename} >Rename</MenuItem>
-                    <MenuItem onTouchTap={this.delete} >Delete</MenuItem>
-                  </IconMenu>
-                </div>
               </CardMedia>
+              <div style={{position:'absolute', top:'0', right:'0', width:'auto', 'minWidth':'auto',display:'inline-block'}}>
+                <IconMenu {...rightIconButtonHandlers} iconButtonElement={iconButtonElement}>
+                  <MenuItem onTouchTap={this.rename} >Rename</MenuItem>
+                  <MenuItem onTouchTap={this.delete} >Delete</MenuItem>
+                </IconMenu>
+              </div>
             </Card>
           </Paper>
+          <div>{ this.props.id === parseInt(this.props.id, 10) ? (<div>
+              <RenameAlbumDialog title={this.props.title} id={this.props.id} open={this.state.renaming} onClose={() => this.setState({renaming:false})} />
+              <DeleteAlbumDialog title={this.props.title} id={this.props.id} open={this.state.deleting} onClose={() => this.setState({deleting:false})} />
+            </div>):'' }
+          </div>
         </div>);
   }
 });
@@ -145,29 +203,6 @@ let ListAlbumsView = React.createClass({
   componentDidMount: function() {
     this.componentDidUpdate();
   },
-  newAlbum: function() {
-        basicModal.show({
-        body: `
-              <p><strong>New Album</strong></p>
-              <input class="basicModal__text" type="text" placeholder="Album Title" name="title">
-              `,
-        class: basicModal.THEME.small,
-        closable: true,
-        buttons: {
-            cancel: {
-                class: basicModal.THEME.xclose,
-                fn: basicModal.close
-            },
-            action: {
-                title: 'Create Album',
-                fn: function(data) {
-                   this.props.createAlbum(data.title);
-                   basicModal.close();
-                }.bind(this)
-            }
-        }
-    });
-  },
 
   render: function() {
     if(!this.props.albums) {
@@ -175,7 +210,6 @@ let ListAlbumsView = React.createClass({
     }
     return <div>
       {Object.keys(this.props.albums).map(this.renderAlbum)}
-      <div onClick={this.newAlbum}>Nouvel Album</div>
     </div>;
   }
 });
