@@ -48,6 +48,7 @@ def preparePhoto(photo):
 
 def update(id):
 
+	query = ''
 	value = {'id': id}
 
 	acceptedFields = ['title']
