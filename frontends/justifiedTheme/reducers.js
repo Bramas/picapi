@@ -1,6 +1,6 @@
 
 import { combineReducers } from 'redux'
-import { SELECT_PHOTO, RENAME_ALBUM, DELETE_ALBUM, CREATE_ALBUM, UPLOAD_FINISHED, START_UPLOADS, ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
+import { SELECT_PHOTO, RENAME_PHOTO, DELETE_PHOTO, RENAME_ALBUM, DELETE_ALBUM, CREATE_ALBUM, UPLOAD_FINISHED, START_UPLOADS, ADD_ATTACHMENTS, ADD_PHOTO, REQUEST_ALBUM_PHOTOS, RECEIVE_ALBUM_PHOTOS, ALBUM_MOVE_PHOTO, RECEIVE_ALBUMS, REQUEST_ALBUMS } from './actions'
 var Immutable = require('immutable');
 
 var React = require('react');
@@ -51,8 +51,20 @@ function reducer(state, action) {
 	  state.isFetching = true;
 	  return state;
 	case ADD_PHOTO:
-		state.photos[action.photo.id] = action.photo
+		state.photos[action.photo.id] = action.photo;
 		return state;
+	case RENAME_PHOTO:
+		state.photos[action.id].title = action.title;
+		return state;
+	case DELETE_PHOTO:
+		delete state.photos[action.id];
+		for(var i = state.albums['unsorted'].photos.length - 1; i >= 0; i--) {
+		    if(state.albums['unsorted'].photos[i] === action.id) {
+		        state.albums['unsorted'].photos.splice(i, 1);
+		    }
+		}
+		return state;
+
 	case UPLOAD_FINISHED:
 		for(var i = state.uploadQueue.length - 1; i >= 0; i--) {
 			    if(state.uploadQueue[i].name === action.name) {

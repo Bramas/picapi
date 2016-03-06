@@ -27,7 +27,7 @@ let AlbumView = React.createClass({
 			return(<div>Loading...</div>);
 		}
 
-		return <div><div ref="gallery">{this.props.photos.map(this.renderPhoto)}</div><Link to={'/albums'}>retour</Link></div>;
+		return <div ref="gallery">{this.props.photos.map(this.renderPhoto)}</div>;
 	},
 
 	componentDidUpdate(prevProps, prevState) {
@@ -43,7 +43,8 @@ let AlbumView = React.createClass({
 const mapStateToProps = (state, props) => {
   if(state.albums[props.params.albumId]) {
   	return {
-		photos: state.albums[props.params.albumId].photos
+		photos: state.albums[props.params.albumId].photos,
+  		isFetching: state.isFetching
 	}
   }
   return {

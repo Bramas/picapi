@@ -20,36 +20,41 @@ def handle_raw_files(alreadyHandled, filename, storage, storage_options, file, *
 	if ext.lower() != '.pef':
 		return alreadyHandled
 
-	db = database.connect()		
-	row = db.execute("SELECT id, title, attachments FROM photos WHERE title = :title", {'title': title}).fetchone()
-
-	if row == None:
-		db.close()
-		return alreadyHandled
-	row = dict(row)
-	if not row['attachments']:
-		attachments = {}
-	else:
-		attachments = json.loads(row['attachments'])
-	if not attachments:
-		attachments = {}
-
-	filename = photos.uid(30)+ext
-	attachments['raw_file'] = filename
-	attachments = json.dumps(attachments)
-
-	db.execute('UPDATE photos SET attachments = :attachments WHERE id=:id', {'attachments': attachments, 'id': row['id']})
-
-
-	if not storages.stores[storage].saveAttachment(row['id'], filename, options=storage_options):
-		db.rollback()
-		db.close()
+	exifData = photos.get_exif(file)
+	if not 'DateTimeOriginal' in exifData:
 		return alreadyHandled
 
-	db.commit()
-	db.close()
+	capturedTime = photos.date_time_to_timestamp(exifData['DateTimeOriginal'])
 
-	return {'id':row['id'],'attachments':{'raw_file': storages.stores[storage].urlAttachment(row['id'], filename)}}
+	db = database.connect()
+	with db:		
+		row = db.execute("SELECT id, title, attachments FROM photos WHERE captured_on = :capturedTime", {'capturedTime': capturedTime}).fetchone()
+
+		if row == None:
+			db.close()
+			return alreadyHandled
+
+		row = dict(row)
+		if not row['attachments']:
+			attachments = {}
+		else:
+			attachments = json.loads(row['attachments'])
+		if not attachments:
+			attachments = {}
+
+		filename = photos.uid(30)+ext
+		attachments['raw_file'] = filename
+		attachments = json.dumps(attachments)
+
+		db.execute('UPDATE photos SET attachments = :attachments WHERE id=:id', {'attachments': attachments, 'id': row['id']})
+
+		if not storages.save(file, str(row['id'])+'_'+filename, type='attachment'):
+			db.rollback()
+			return alreadyHandled
+
+
+
+	return {'id':row['id'],'attachments':{'raw_file': storages.url(str(row['id'])+'_'+filename, type='attachment')}}
 
 
 

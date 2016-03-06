@@ -29,19 +29,22 @@ module.exports = React.createClass({
 		this.componentDidUpdate();
 	},
 	openLeftNav: function() {
-		console.log(this.state.leftNavOpen);
-		this.setState({leftNavOpen: !this.state.leftNavOpen})
+		this.setState({leftNavOpen: true})
+	},
+	closeLeftNav: function() {
+		this.setState({leftNavOpen: false})
 	},
 	render: function() {
+
 		return <div>
 			<LeftNav
 	          docked={false}
 	          width={200}
 	          open={this.state.leftNavOpen}
-	          onRequestChange={leftNavOpen => this.setState({leftNavOpen})}
+	          onRequestChange={open => this.setState({leftNavOpen: open})}
 	        >
-	          <MenuItem onTouchTap={this.handleClose}>Menu Item</MenuItem>
-	          <MenuItem onTouchTap={this.handleClose}>Menu Item 2</MenuItem>
+	          <MenuItem onTouchTap={() => { api.history.push('/albums'); this.closeLeftNav(); }}>Albums</MenuItem>
+	          <MenuItem onTouchTap={() => { api.history.push('/'); this.closeLeftNav(); }}>Settings</MenuItem>
 	        </LeftNav>
 	        <AppBar
 	        	onLeftIconButtonTouchTap={this.openLeftNav}

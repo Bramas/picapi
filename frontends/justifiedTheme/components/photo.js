@@ -20,7 +20,7 @@ import IconMenu from 'material-ui/lib/menus/icon-menu';
 import MenuItem from 'material-ui/lib/menus/menu-item';
 import AddIcon from 'material-ui/lib/svg-icons/content/add';
 
-import { selectPhoto } from '../actions';
+import { selectPhoto, albumMovePhoto } from '../actions';
 
 import styles from 'material-ui/lib/styles';
 const Colors = styles.Colors;
@@ -132,13 +132,16 @@ let Photo = DragSource('photo', photoSource, collect)(React.createClass({
               <div style={{position:'absolute', top:'0', right:'0', width:'auto', 'minWidth':'auto',display:'inline-block'}}>
                 <IconMenu iconButtonElement={iconButtonElement}>
                   <MenuItem onTouchTap={() => this.setState({renaming:true})} >Rename</MenuItem>
-                  <MenuItem onTouchTap={() => this.setState({deleting:true})} >Delete</MenuItem>
+                  {this.props.albumId == 'unsorted'?
+                    <MenuItem onTouchTap={() => this.setState({deleting:true})} >Delete</MenuItem>:
+                    <MenuItem onTouchTap={() => api.store.dispatch(albumMovePhoto(this.props.albumId, 'unsorted', this.props.id))} >Remove from the album</MenuItem>
+                  }
                 </IconMenu>
               </div>
             </Card>
           </Paper>
           <RenamePhotoDialog title={this.props.title} id={this.props.id} open={this.state.renaming} onClose={() => this.setState({renaming:false})} />
-          <DeletePhotoDialog title={this.props.title} id={this.props.id} open={this.state.deleting} onClose={() => this.setState({deleting:false})} />
+          <DeletePhotoDialog title={this.props.title} albumId={this.props.albumId} id={this.props.id} open={this.state.deleting} onClose={() => this.setState({deleting:false})} />
         </div>);
 	}
 }));

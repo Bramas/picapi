@@ -1,8 +1,8 @@
 
 import bottle, exifread
-from PIL import Image
+from PIL import Image, ImageOps
 from bottle import response, request
-import os, json, sys, sqlite3, datetime, time, string, random
+import os, json, sys, sqlite3, datetime, time, string, random, io
 from os import listdir
 from os.path import isfile, isdir, join
 
@@ -31,17 +31,19 @@ def preparePhoto(photo):
 	if 'attachments' in photo and photo['attachments']: attachments = photo['attachments']
 	attachments = json.loads(attachments)
 	for i in attachments:
-		attachments[i] = storages.stores[photo['storage']].urlAttachment(photo['id'], attachments[i])
+		attachments[i] = storages.stores[photo['storage']].url(str(photo['id'])+'_'+attachments[i], type='attachment')
 
+	url_info = {
+		'base': storages.stores[photo['storage']].url(str(photo['id'])+'_'+photo['secret'],type='thumbnail'),
+		'extension': photo['extension']
+	}
+	if photo['o_secret']:
+		url_info['original'] = storages.stores[photo['storage']].url(str(photo['id'])+'_'+photo['secret']+'_'+photo['o_secret']+photo['extension'],type='photo')
 	data = {
 		'id'  : photo['id'],
 		'title': photo['title'],
 		'attachments': attachments,
-		'url_info' : storages.stores[photo['storage']].url_info(
-			photo['id'],
-			photo['secret'], 
-			photo['o_secret'], 
-			photo['extension'])
+		'url_info' : url_info
 	}
 
 	return data
@@ -139,8 +141,93 @@ def get_exif(file):
 	file.seek(0)
 	return metadata
 
+def date_time_to_timestamp(dateTime):
+	d, t = dateTime.split(' ')
+	year, month, day = [int(i) for i in d.split(':')]
+	hour, minute, second = [int(i) for i in t.split(':')]
+	return datetime.datetime(year, month, day, hour, minute, second).timestamp()
 
-def add(filename, storage='local', storage_options=None, file = None):
+def save_photo_and_thhumbnails(file, id, secret, o_secret, ext, content_type=None):
+
+	o_filename = str(id) + '_' + secret + '_' + o_secret + ext
+
+	basename = str(id) + '_' + secret
+
+	storages.save(file, o_filename, type='photo', content_type=content_type)
+	im = Image.open(file)
+	bio = io.BytesIO()
+	if max(im.size) > 2048:
+		im.thumbnail([2048,2048], Image.ANTIALIAS)
+		im.save(bio, "JPEG")
+		bio.seek(0)
+		storages.save(bio, basename+'_k'+ext, 'thumbnail', content_type='image/jpeg')
+		bio = io.BytesIO()
+
+	thumb = ImageOps.fit(im, [75,75], Image.ANTIALIAS)
+	thumb.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+'_s'+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+
+	thumb = ImageOps.fit(im, [150,150], Image.ANTIALIAS)
+	thumb.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+'_q'+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+	
+
+	im2 = im.copy()
+	im2.thumbnail([1600,1600], Image.ANTIALIAS)
+	im2.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+'_h'+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+
+	im = im.copy()
+	im.thumbnail([1024,1024], Image.ANTIALIAS)
+	im.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+'_b'+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+
+	im2 = im.copy()
+	im2.thumbnail([800,800], Image.ANTIALIAS)
+	im2.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+'_c'+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+
+	im2 = im.copy()
+	im2.thumbnail([640,640], Image.ANTIALIAS)
+	im2.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+'_z'+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+
+	im2 = im.copy()
+	im2.thumbnail([500,500], Image.ANTIALIAS)
+	im2.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+
+	im2 = im.copy()
+	im2.thumbnail([320,320], Image.ANTIALIAS)
+	im2.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+'_n'+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+
+	im2 = im.copy()
+	im2.thumbnail([240,240], Image.ANTIALIAS)
+	im2.save(bio, "JPEG")
+	bio.seek(0)
+	storages.save(bio, basename+'_m'+ext, 'thumbnail', content_type='image/jpeg')
+	bio = io.BytesIO()
+	return True
+
+
+def add(filename, storage=None, storage_options=None, file = None, content_type=None):
 	"""
 		Adds a photo to the library.
 
@@ -153,6 +240,9 @@ def add(filename, storage='local', storage_options=None, file = None):
 		:return: the id of the photo
 		:rtype: int
 	"""
+	if storage == None:
+		storage = storages.defaultStore
+		
 	title, ext  = os.path.splitext(filename)
 	ext = ext.lower()
 	if ext not in config.Config.AllowedExtensions:
@@ -179,10 +269,7 @@ def add(filename, storage='local', storage_options=None, file = None):
 		tags = get_xmptags(file)
 		metadata = get_exif(file)
 		if 'DateTimeOriginal' in metadata:
-			d, t = metadata['DateTimeOriginal'].split(' ')
-			year, month, day = [int(i) for i in d.split(':')]
-			hour, minute, second = [int(i) for i in t.split(':')]
-			captured_on = datetime.datetime(year, month, day, hour, minute, second).timestamp()
+			captured_on = date_time_to_timestamp(metadata['DateTimeOriginal'])
 		if 'Rating' in metadata: rating = metadata['Rating']
 
 	
@@ -215,7 +302,7 @@ def add(filename, storage='local', storage_options=None, file = None):
 		(:secret, :o_secret, :title, :extension, :filesize, :width, :height, :captured_on, :captured_year, :captured_month, :created_on, :modified_on, :rating, :metadata, :storage )""", value)
 
 	id = cursor.lastrowid
-	if storages.stores[storage].save(id, secret, o_secret, ext, options=storage_options):
+	if save_photo_and_thhumbnails(file, id, secret, o_secret, ext, content_type=content_type):
 		db.commit()
 		db.close()
 		value['id'] = id
@@ -273,12 +360,7 @@ def route_options_upload(id=0):
 def route_post_upload():
 	upload     = bottle.request.files.get('upload')
 
-	def save(filepath, filename):
-		upload.filename = filename
-		upload.save(filepath)
-		return True
-		
-	photo = add(upload.filename, file=upload.file, storage='local', storage_options={'save':save})
+	photo = add(upload.filename, file=upload.file, content_type=upload.content_type)
 	if not photo:
 		return error()
 	return success(photo)

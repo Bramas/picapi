@@ -13,19 +13,25 @@ class LocalStorage():
 		Store the photo in the local directory data/photos/uploads
 	"""
 	
-	def saveAttachment(self, id, filename, options=None):
-		filename = str(id)+'_'+filename
+	def save(self, file, filename, type):
+		if type == 'attachments':
+			f = open(join(config.Path.Attachments, filename), 'wb')
+			f.write(file.read())
+			return True
+		if type == 'photo':
+			f = open(join(config.Path.Uploads, filename), 'wb')
+			f.write(file.read())
+			return True
+		return False
 
-		if 'save' in options:
-			options['save'](config.Path.Attachments, filename)
-		else:
-			return False
-
-		return True
-	def urlAttachment(self, id, filename):
-		filename = str(id)+'_'+filename
-		
-		return config.Config.BaseUrl+'/static_attachement/'+filename
+	def url(self, filename, type):
+		if type == 'attachments':
+			return config.Config.BaseUrl+'/static_attachement/'+filename
+		if type == 'photo':
+			return config.Config.BaseUrl+'/static_o/'+filename
+		if type == 'thumbnail':
+			return config.Config.BaseUrl+'/static/'+filename
+		return None
 
 	def save(self, id, secret, o_secret, ext, options=None):
 		o_filename = str(id) + '_' + secret + '_' + o_secret + ext
@@ -79,7 +85,8 @@ class LocalStorage():
 	def delete(self, id, secret, o_secret, ext):
 		filename = str(id) + '_' + secret + '_' + o_secret + ext
 		filename = join(config.Path.Uploads, filename)
-		os.remove(filename)
+		if isfile(filename):
+			os.remove(filename)
 		return True
 
 	def url_info(self, id, secret, o_secret, ext):
@@ -93,7 +100,16 @@ class LocalStorage():
 
 
 stores = {}
-
+defaultStore = 'local'
 
 def init():
 	stores['local'] = LocalStorage()
+
+def save(*args,**kwargs):
+	return stores[defaultStore].save(*args,**kwargs)
+
+def url(*args,**kwargs):
+	return stores[defaultStore].url(*args,**kwargs)
+
+def delete(*args,**kwargs):
+	return stores[defaultStore].delete(*args,**kwargs)

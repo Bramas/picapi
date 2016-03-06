@@ -198,7 +198,9 @@ let ListAlbumsView = React.createClass({
   },
 
   componentDidUpdate: function() {
-
+    if(!this.props.albums && !this.props.isFetching) {
+      this.props.fetchAlbums();
+    }
   },
   componentDidMount: function() {
     this.componentDidUpdate();
@@ -206,6 +208,7 @@ let ListAlbumsView = React.createClass({
 
   render: function() {
     if(!this.props.albums) {
+
       return <div>Loading...</div>
     }
     return <div>
@@ -229,9 +232,6 @@ const mapStateToProps2 = (state, props) => {
 }
 
 const mapDispatchToProps2 = (dispatch, props) => {
-  if(!props.albums && !props.isFetching) {
-    dispatch(fetchAlbums());
-  }
   return {
     fetchAlbums: function() {
       dispatch(fetchAlbums())

@@ -430,7 +430,7 @@ module.exports = api;
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _reactDnd = require('react-dnd');
@@ -455,104 +455,96 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var AlbumView = React.createClass({
-	displayName: 'AlbumView',
+  displayName: 'AlbumView',
 
-	renderPhoto: function renderPhoto(photoId) {
-		return React.createElement(_photo2.default, { key: photoId, albumId: this.props.params.albumId, id: photoId });
-	},
+  renderPhoto: function renderPhoto(photoId) {
+    return React.createElement(_photo2.default, { key: photoId, albumId: this.props.params.albumId, id: photoId });
+  },
 
-	componentDidMount: function componentDidMount() {
-		this.componentDidUpdate();
-	},
+  componentDidMount: function componentDidMount() {
+    this.componentDidUpdate();
+  },
 
-	render: function render() {
-		if (!this.props.photos) {
-			return React.createElement(
-				'div',
-				null,
-				'Loading...'
-			);
-		}
+  render: function render() {
+    if (!this.props.photos) {
+      return React.createElement(
+        'div',
+        null,
+        'Loading...'
+      );
+    }
 
-		return React.createElement(
-			'div',
-			null,
-			React.createElement(
-				'div',
-				{ ref: 'gallery' },
-				this.props.photos.map(this.renderPhoto)
-			),
-			React.createElement(
-				_reactRouter.Link,
-				{ to: '/albums' },
-				'retour'
-			)
-		);
-	},
+    return React.createElement(
+      'div',
+      { ref: 'gallery' },
+      this.props.photos.map(this.renderPhoto)
+    );
+  },
 
-	componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-		if (!this.props.photos && !this.props.isFetching) {
-			console.log('album ' + this.props.albumId + ' not found => fetching');
-			this.props.fetchAlbumPhotos(this.props.params.albumId);
-		}
-	}
+  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+    if (!this.props.photos && !this.props.isFetching) {
+      console.log('album ' + this.props.albumId + ' not found => fetching');
+      this.props.fetchAlbumPhotos(this.props.params.albumId);
+    }
+  }
 });
 
 var mapStateToProps = function mapStateToProps(state, props) {
-	if (state.albums[props.params.albumId]) {
-		return {
-			photos: state.albums[props.params.albumId].photos
-		};
-	}
-	return {
-		photos: false,
-		isFetching: state.isFetching
-	};
+  if (state.albums[props.params.albumId]) {
+    return {
+      photos: state.albums[props.params.albumId].photos,
+      isFetching: state.isFetching
+    };
+  }
+  return {
+    photos: false,
+    isFetching: state.isFetching
+  };
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch, props) {
-	return {
-		fetchAlbumPhotos: function fetchAlbumPhotos(albumId) {
-			dispatch((0, _actions.fetchAlbumPhotos)(albumId));
-		}
-	};
+  return {
+    fetchAlbumPhotos: function fetchAlbumPhotos(albumId) {
+      dispatch((0, _actions.fetchAlbumPhotos)(albumId));
+    }
+  };
 };
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(AlbumView);
 
 var Album = React.createClass({
-	displayName: 'Album',
-	getInitialState: function getInitialState() {
-		return {
-			photos: []
-		};
-	},
-	componentDidMount: function componentDidMount() {
-		// fetch data initially in scenario 2 from above
-		this.fetchInvoice();
-	},
-	componentDidUpdate: function componentDidUpdate(prevProps) {
-		var oldId = prevProps.params.albumId;
-		var newId = this.props.params.albumId;
-		if (newId !== oldId) this.fetchInvoice();
-	},
-	componentWillUnmount: function componentWillUnmount() {},
-	onDataReceived: function onDataReceived(data) {
-		this.setState({ photos: data });
-		/*ReactDom.render(<Layout 
-  	leftPane={<TreeTimeline data={timeline} onToggle={handleTreeClick}/>}
-  	mainPane={<Album photos={photos} />} />, document.getElementById('main-container'))*/
-	},
-	fetchInvoice: function fetchInvoice() {
-		var params = {
-			albumID: this.props.params.albumId,
-			password: null
-		};
-		_api2.default.get('/albums/' + this.props.params.albumId + '/photos', {}, this.onDataReceived);
-	},
-	render: function render() {
-		return React.createElement(AlbumView, { photos: this.state.photos });
-	}
+  displayName: 'Album',
+  getInitialState: function getInitialState() {
+    return {
+      photos: []
+    };
+  },
+  componentDidMount: function componentDidMount() {
+    // fetch data initially in scenario 2 from above
+    this.fetchInvoice();
+  },
+  componentDidUpdate: function componentDidUpdate(prevProps) {
+    var oldId = prevProps.params.albumId;
+    var newId = this.props.params.albumId;
+    if (newId !== oldId) this.fetchInvoice();
+  },
+  componentWillUnmount: function componentWillUnmount() {},
+  onDataReceived: function onDataReceived(data) {
+    this.setState({ photos: data });
+    /*ReactDom.render(<Layout 
+    	leftPane={<TreeTimeline data={timeline} onToggle={handleTreeClick}/>}
+    	mainPane={<Album photos={photos} />} />, document.getElementById('main-container'))*/
+  },
+  fetchInvoice: function fetchInvoice() {
+    var params = {
+      albumID: this.props.params.albumId,
+      password: null
+    };
+    _api2.default.get('/albums/' + this.props.params.albumId + '/photos', {}, this.onDataReceived);
+  },
+  render: function render() {
+    return React.createElement(AlbumView, { photos: this.state.photos });
+  }
 });
 
 },{"../actions":1,"../api":2,"./photo":13,"react":577,"react-dnd":276,"react-dom":373,"react-redux":376,"react-router":404}],4:[function(require,module,exports){
@@ -827,13 +819,18 @@ var ListAlbumsView = React.createClass({
     return React.createElement(AlbumLink, { key: album.id, id: album.id, to: '/album/' + album.id, img: _api2.default.thumbUrl(album.cover), title: album.title });
   },
 
-  componentDidUpdate: function componentDidUpdate() {},
+  componentDidUpdate: function componentDidUpdate() {
+    if (!this.props.albums && !this.props.isFetching) {
+      this.props.fetchAlbums();
+    }
+  },
   componentDidMount: function componentDidMount() {
     this.componentDidUpdate();
   },
 
   render: function render() {
     if (!this.props.albums) {
+
       return React.createElement(
         'div',
         null,
@@ -862,9 +859,6 @@ var mapStateToProps2 = function mapStateToProps2(state, props) {
 };
 
 var mapDispatchToProps2 = function mapDispatchToProps2(dispatch, props) {
-  if (!props.albums && !props.isFetching) {
-    dispatch((0, _actions.fetchAlbums)());
-  }
   return {
     fetchAlbums: function fetchAlbums() {
       dispatch((0, _actions.fetchAlbums)());
@@ -1323,8 +1317,10 @@ module.exports = React.createClass({
 		this.componentDidUpdate();
 	},
 	openLeftNav: function openLeftNav() {
-		console.log(this.state.leftNavOpen);
-		this.setState({ leftNavOpen: !this.state.leftNavOpen });
+		this.setState({ leftNavOpen: true });
+	},
+	closeLeftNav: function closeLeftNav() {
+		this.setState({ leftNavOpen: false });
 	},
 	render: function render() {
 		var _this = this;
@@ -1338,19 +1334,23 @@ module.exports = React.createClass({
 					docked: false,
 					width: 200,
 					open: this.state.leftNavOpen,
-					onRequestChange: function onRequestChange(leftNavOpen) {
-						return _this.setState({ leftNavOpen: leftNavOpen });
+					onRequestChange: function onRequestChange(open) {
+						return _this.setState({ leftNavOpen: open });
 					}
 				},
 				React.createElement(
 					_menuItem2.default,
-					{ onTouchTap: this.handleClose },
-					'Menu Item'
+					{ onTouchTap: function onTouchTap() {
+							_api2.default.history.push('/albums');_this.closeLeftNav();
+						} },
+					'Albums'
 				),
 				React.createElement(
 					_menuItem2.default,
-					{ onTouchTap: this.handleClose },
-					'Menu Item 2'
+					{ onTouchTap: function onTouchTap() {
+							_api2.default.history.push('/');_this.closeLeftNav();
+						} },
+					'Settings'
 				)
 			),
 			React.createElement(_appBar2.default, {
@@ -2135,12 +2135,18 @@ var Photo = (0, _reactDnd.DragSource)('photo', photoSource, collect)(React.creat
                   } },
                 'Rename'
               ),
-              React.createElement(
+              this.props.albumId == 'unsorted' ? React.createElement(
                 _menuItem2.default,
                 { onTouchTap: function onTouchTap() {
                     return _this.setState({ deleting: true });
                   } },
                 'Delete'
+              ) : React.createElement(
+                _menuItem2.default,
+                { onTouchTap: function onTouchTap() {
+                    return _api2.default.store.dispatch((0, _actions.albumMovePhoto)(_this.props.albumId, 'unsorted', _this.props.id));
+                  } },
+                'Remove from the album'
               )
             )
           )
@@ -2149,7 +2155,7 @@ var Photo = (0, _reactDnd.DragSource)('photo', photoSource, collect)(React.creat
       React.createElement(_dialogs.RenamePhotoDialog, { title: this.props.title, id: this.props.id, open: this.state.renaming, onClose: function onClose() {
           return _this.setState({ renaming: false });
         } }),
-      React.createElement(_dialogs.DeletePhotoDialog, { title: this.props.title, id: this.props.id, open: this.state.deleting, onClose: function onClose() {
+      React.createElement(_dialogs.DeletePhotoDialog, { title: this.props.title, albumId: this.props.albumId, id: this.props.id, open: this.state.deleting, onClose: function onClose() {
           return _this.setState({ deleting: false });
         } })
     ));
@@ -58244,6 +58250,18 @@ function reducer(state, action) {
 		case _actions.ADD_PHOTO:
 			state.photos[action.photo.id] = action.photo;
 			return state;
+		case _actions.RENAME_PHOTO:
+			state.photos[action.id].title = action.title;
+			return state;
+		case _actions.DELETE_PHOTO:
+			delete state.photos[action.id];
+			for (var i = state.albums['unsorted'].photos.length - 1; i >= 0; i--) {
+				if (state.albums['unsorted'].photos[i] === action.id) {
+					state.albums['unsorted'].photos.splice(i, 1);
+				}
+			}
+			return state;
+
 		case _actions.UPLOAD_FINISHED:
 			for (var i = state.uploadQueue.length - 1; i >= 0; i--) {
 				if (state.uploadQueue[i].name === action.name) {
